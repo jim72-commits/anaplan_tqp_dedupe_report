@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRB Territory Overlap Viewer</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-hover: #eef1f6;
+    --surface-active: #dfe4ed;
+    --border: #d4d8e1;
+    --text: #1a1f36;
+    --text-muted: #5e6577;
+    --accent: #0028A1;
+    --accent-light: #1a4fc9;
+    --accent-dim: rgba(0,40,161,.08);
+    --green: #0d7a4f;
+    --amber: #a85d00;
+    --red: #c53030;
+    --radius: 6px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Cascadia Code', 'Consolas', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ---- Import Screen ---- */
+  .import-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 40px 48px; text-align: center; max-width: 600px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+  .import-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: var(--accent); }
+  .import-card > p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+  .import-row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .import-slot { flex: 1; }
+  .import-slot .slot-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+  .drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 28px 16px; cursor: pointer; transition: border-color .2s, background .2s; text-align: center; }
+  .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-dim); }
+  .drop-zone.loaded { border-color: var(--green); border-style: solid; }
+  .drop-zone .icon { font-size: 28px; margin-bottom: 8px; color: var(--accent); }
+  .drop-zone.loaded .icon { color: var(--green); }
+  .drop-zone .main-text { font-size: 13px; font-weight: 600; }
+  .drop-zone .sub-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .drop-zone .file-name { font-size: 11px; color: var(--green); font-family: var(--mono); margin-top: 6px; word-break: break-all; }
+  .import-card .expected { font-size: 11px; color: var(--text-muted); background: #f0f2f5; border-radius: 6px; padding: 10px 14px; text-align: left; line-height: 1.7; margin-bottom: 16px; }
+  .import-card .expected code { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .launch-btn { padding: 10px 28px; border-radius: var(--radius); border: none; background: var(--accent); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+  .launch-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .launch-btn:not(:disabled):hover { opacity: .85; }
+  #importError { color: var(--red); font-size: 13px; margin-top: 14px; display: none; }
+  #importProgress { color: var(--accent); font-size: 13px; margin-top: 14px; display: none; }
+
+  /* ---- Import Screen inside tab ---- */
+  #importScreen { display: flex; align-items: center; justify-content: center; flex: 1; }
+  header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; flex-shrink: 0; background: var(--accent); color: #fff; }
+  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; color: #fff; }
+  .stats { display: flex; gap: 24px; margin-left: auto; font-size: 13px; color: rgba(255,255,255,.75); }
+  .stats .val { color: #fff; font-weight: 600; font-family: var(--mono); }
+  .search-bar { padding: 10px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; flex-shrink: 0; align-items: center; }
+  .search-bar { background: var(--surface); }
+  .search-bar input { flex: 1; max-width: 360px; padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; color: var(--text); font-size: 13px; outline: none; transition: border-color .15s; }
+  .search-bar input:focus { border-color: var(--accent); }
+  .search-bar select { padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; color: var(--text); font-size: 13px; outline: none; cursor: pointer; }
+  .panels { flex: 1; display: flex; overflow: hidden; }
+  .panel { display: flex; flex-direction: column; overflow: hidden; }
+  .panel-left { width: 45%; border-right: 1px solid var(--border); }
+  .panel-right { flex: 1; }
+  .panel-header { padding: 12px 20px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); background: #f8f9fb; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .panel-header .count { font-family: var(--mono); color: var(--accent); font-size: 12px; background: var(--accent-dim); padding: 2px 8px; border-radius: 10px; }
+  .grid-container { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { position: sticky; top: 0; z-index: 1; }
+  th { background: #f8f9fb; padding: 10px 16px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; transition: color .15s; }
+  th:hover { color: var(--accent); }
+  th.sorted-asc::after { content: " \u25B2"; font-size: 9px; }
+  th.sorted-desc::after { content: " \u25BC"; font-size: 9px; }
+  th.num, td.num { text-align: right; }
+  td { padding: 9px 16px; border-bottom: 1px solid #eaecf0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .left-table tr { cursor: pointer; transition: background .1s; }
+  .left-table tbody tr:hover { background: var(--surface-hover); }
+  .left-table tbody tr.active { background: var(--surface-active); }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .srb { color: var(--green); font-family: var(--mono); font-size: 12px; }
+  .terr-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .terr-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-family: var(--mono); background: var(--accent-dim); color: var(--accent); cursor: pointer; transition: background .15s; }
+  .terr-tag:hover { background: rgba(0,40,161,.16); }
+  .empty-state { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 14px; padding: 40px; text-align: center; line-height: 1.6; }
+  .right-summary { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #f8f9fb; display: flex; gap: 24px; font-size: 13px; flex-shrink: 0; flex-wrap: wrap; }
+  .right-summary .label { color: var(--text-muted); margin-right: 6px; }
+  .resize-handle { width: 4px; background: var(--border); cursor: col-resize; flex-shrink: 0; transition: background .15s; }
+  .resize-handle:hover { background: var(--accent); }
+  .export-btn, .import-new-btn { padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; color: var(--text); font-size: 12px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .export-btn:hover, .import-new-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  /* ---- Modal ---- */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border: 1px solid var(--border); border-radius: 12px; width: 90vw; max-width: 1100px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
+  .modal-title { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px; flex-shrink: 0; background: var(--accent); color: #fff; border-radius: 11px 11px 0 0; }
+  .modal-title .close-btn { margin-left: auto; background: none; border: none; color: rgba(255,255,255,.7); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color .15s, background .15s; }
+  .modal-title .close-btn:hover { color: #fff; background: rgba(255,255,255,.15); }
+  .modal-body { display: flex; flex: 1; overflow: hidden; }
+  .modal-col { flex: 1; padding: 20px 24px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .modal-col + .modal-col { border-left: 1px solid var(--border); }
+  .modal-col h3 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .modal-col h3 .terr-code { font-family: var(--mono); color: var(--accent); font-size: 14px; text-transform: none; }
+  .attr-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .attr-table td { padding: 6px 10px; border-bottom: 1px solid #eaecf0; vertical-align: top; }
+  .attr-table td:first-child { color: var(--text-muted); white-space: nowrap; width: 40%; font-weight: 500; }
+  .attr-table td:last-child { color: var(--text); word-break: break-word; white-space: normal; }
+  .attr-table tr.diff td:last-child { color: var(--amber); }
+  .no-attrs { color: var(--text-muted); font-size: 13px; font-style: italic; padding: 12px 0; }
+  .grid-container { background: #fff; }
+
+  /* ---- Tabs ---- */
+  .tab-bar { display: flex; background: #001a6e; flex-shrink: 0; border-bottom: 2px solid var(--border); padding: 0 16px; gap: 4px; }
+  .tab-btn { padding: 12px 28px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.6); background: none; border: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s, background .15s; border-radius: 6px 6px 0 0; }
+  .tab-btn:hover { color: #fff; background: rgba(255,255,255,.08); }
+  .tab-btn.active { color: #fff; border-bottom-color: #ffc107; background: rgba(255,255,255,.1); }
+  .tab-page { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .tab-page.active { display: flex; }
+
+  /* ---- Coin Sort ---- */
+  #coinSortPage { padding: 0; }
+  .cs-sub-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: #f8f9fb; flex-shrink: 0; }
+  .cs-sub-tab { padding: 10px 24px; font-size: 13px; font-weight: 600; color: var(--text-muted); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+  .cs-sub-tab:hover { color: var(--accent); }
+  .cs-sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .cs-sub-page { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .cs-sub-page.active { display: flex; }
+  .cs-toolbar { padding: 12px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: center; background: var(--surface); flex-shrink: 0; flex-wrap: wrap; }
+  .cs-import-row { display: flex; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--border); background: #f8f9fb; flex-shrink: 0; align-items: flex-end; flex-wrap: wrap; }
+  .cs-import-slot { display: flex; flex-direction: column; gap: 4px; }
+  .cs-import-slot label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
+  .cs-import-slot .drop-sm { border: 2px dashed var(--border); border-radius: var(--radius); padding: 10px 18px; cursor: pointer; font-size: 12px; color: var(--text-muted); transition: border-color .15s, background .15s; text-align: center; min-width: 200px; }
+  .cs-import-slot .drop-sm:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .cs-import-slot .drop-sm.loaded { border-color: var(--green); border-style: solid; color: var(--green); font-family: var(--mono); font-size: 11px; }
+  .cs-run-btn { padding: 8px 24px; border-radius: var(--radius); border: none; background: var(--accent); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+  .cs-run-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .cs-run-btn:not(:disabled):hover { opacity: .85; }
+  .cs-stats { font-size: 13px; color: var(--text-muted); margin-left: 12px; }
+  .cs-stats .val { color: var(--accent); font-weight: 600; font-family: var(--mono); }
+  .cs-results { flex: 1; overflow: auto; background: #fff; }
+  .cs-results table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cs-results th { background: #f8f9fb; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
+  .cs-results td { padding: 8px 14px; border-bottom: 1px solid #eaecf0; white-space: nowrap; }
+  .cs-progress { padding: 24px; font-size: 14px; color: var(--accent); }
+  .cs-empty { padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+  /* ---- Single Territory Coin Sort ---- */
+  .st-toolbar { padding: 16px 24px; border-bottom: 1px solid var(--border); background: #f8f9fb; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; flex-shrink: 0; }
+  .st-toolbar .cs-import-slot { min-width: 180px; }
+  .st-toolbar select { padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; color: var(--text); font-size: 13px; outline: none; cursor: pointer; min-width: 220px; }
+  .st-toolbar select:focus { border-color: var(--accent); }
+  .st-content { flex: 1; overflow: auto; padding: 0; }
+  .st-summary { margin: 32px auto; max-width: 560px; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 32px 40px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.05); }
+  .st-summary h2 { font-size: 18px; margin-bottom: 20px; color: var(--accent); }
+  .st-summary .st-metrics { display: flex; gap: 32px; justify-content: center; margin-bottom: 24px; }
+  .st-summary .st-metric { text-align: center; }
+  .st-summary .st-metric .num { font-size: 28px; font-weight: 700; font-family: var(--mono); color: var(--accent); }
+  .st-summary .st-metric .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+  .st-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .st-actions button { padding: 10px 24px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s, background .15s; }
+  .st-btn-primary { background: var(--accent); color: #fff; border: none; }
+  .st-btn-primary:hover { opacity: .85; }
+  .st-btn-success { background: var(--green); color: #fff; border: none; }
+  .st-btn-success:hover { opacity: .85; }
+  .st-btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+  .st-btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .st-detail-actions { padding: 16px 24px; border-bottom: 1px solid var(--border); background: #f8f9fb; display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+  .st-no-match { margin: 60px auto; text-align: center; color: var(--text-muted); font-size: 15px; }
+  .st-attrs { margin-bottom: 24px; text-align: left; }
+  .st-attrs-toggle { font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; padding: 8px 0; user-select: none; }
+  .st-attrs-toggle:hover { text-decoration: underline; }
+  .st-attrs-body { margin-top: 8px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
+  .st-attrs .attr-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .st-attrs .attr-table td { padding: 6px 10px; border-bottom: 1px solid #eaecf0; vertical-align: top; }
+  .st-attrs .attr-label { font-weight: 600; color: var(--text-muted); white-space: nowrap; width: 180px; text-transform: uppercase; font-size: 11px; letter-spacing: .3px; }
+  .st-attrs .attr-val { color: var(--text); word-break: break-word; white-space: normal; font-family: var(--mono); font-size: 11px; }
+
+  /* Detail row expand */
+  .st-expand-icon { color: var(--accent); font-size: 10px; text-align: center; width: 36px; user-select: none; }
+  .st-row-main:hover { background: var(--surface-hover); }
+  .st-row-detail > td { padding: 0 !important; background: #f8f9fb; }
+  .st-compare { display: flex; gap: 0; border-top: 1px solid var(--border); }
+  .st-compare-col { flex: 1; padding: 12px 16px; overflow: auto; max-height: 300px; }
+  .st-compare-col:first-child { border-right: 1px solid var(--border); }
+  .st-compare-title { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .3px; }
+  .st-cmp-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .st-cmp-table td { padding: 4px 8px; border-bottom: 1px solid #eaecf0; vertical-align: top; }
+  .st-cmp-label { font-weight: 600; color: var(--text-muted); white-space: nowrap; width: 160px; text-transform: uppercase; font-size: 10px; letter-spacing: .3px; }
+  .st-cmp-val { color: var(--text); word-break: break-word; white-space: normal; font-family: var(--mono); font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- ========== Global Header + Tabs (always visible) ========== -->
+<header>
+  <h1>SRB Territory Overlap Viewer</h1>
+  <div class="stats" id="overlapStats" style="display:none;">
+    <span>Territories <span class="val" id="statTerr">—</span></span>
+    <span>Overlapping MixedIDs <span class="val" id="statMixed">—</span></span>
+  </div>
+</header>
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="overlapPage">Overlap Report</button>
+  <button class="tab-btn" data-tab="coinSortPage">Coin Sort</button>
+</div>
+
+<!-- ===== Tab 1: Overlap Report ===== -->
+<div class="tab-page active" id="overlapPage">
+
+  <!-- Import Screen (shown before data is loaded) -->
+  <div id="importScreen">
+    <div class="import-card">
+      <h1>Overlap Report</h1>
+      <p>Import your data files to analyze territory overlaps.</p>
+      <div class="import-row">
+        <div class="import-slot">
+          <div class="slot-label">1. SRB Transactions (required)</div>
+          <div class="drop-zone" id="dropZone1">
+            <div class="icon">&#128202;</div>
+            <div class="main-text">SYS82 SRB Transactions A5</div>
+            <div class="sub-text">Drop CSV or click to browse</div>
+          </div>
+        </div>
+        <div class="import-slot">
+          <div class="slot-label">2. Territory Rules (optional)</div>
+          <div class="drop-zone" id="dropZone2">
+            <div class="icon">&#128209;</div>
+            <div class="main-text">SYS09B Rules Textlists</div>
+            <div class="sub-text">Drop CSV or click to browse</div>
+          </div>
+        </div>
+      </div>
+      <div class="expected">
+        <strong>File 1 columns:</strong> <code>MIXED ID</code>, <code>Territory Code</code>, <code>Associated Job Type</code>, <code>Sales Team</code>, <code>VALUE (20xx SRB $)</code><br>
+        <strong>File 2 columns:</strong> <code>Territory Code</code>, <code>TERRITORY NAME</code>, <code>REGION</code>, <code>COUNTRY</code>, etc.
+      </div>
+      <button class="launch-btn" id="launchBtn" disabled>Analyze Overlaps</button>
+      <div id="importError"></div>
+      <div id="importProgress"></div>
+      <input type="file" id="fileInput1" accept=".csv" style="display:none">
+      <input type="file" id="fileInput2" accept=".csv" style="display:none">
+    </div>
+  </div>
+
+  <!-- Overlap Results (shown after data is loaded) -->
+  <div id="overlapResults" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+    <div class="search-bar">
+      <input id="searchInput" type="text" placeholder="Search territory code or name...">
+      <select id="filterTeam"><option value="">All Sales Teams</option></select>
+      <select id="filterJob"><option value="">All Job Types</option></select>
+      <button class="export-btn" id="exportBtn">Export Detail CSV</button>
+      <button class="import-new-btn" id="importNewBtn">Import New Files</button>
+    </div>
+    <div class="panels">
+      <div class="panel panel-left" id="panelLeft">
+        <div class="panel-header">Territories with Overlaps <span class="count" id="leftCount">0</span></div>
+        <div class="grid-container">
+          <table class="left-table">
+            <thead><tr>
+              <th data-col="territoryCode">Territory</th>
+              <th data-col="territoryName">Territory Name</th>
+              <th data-col="overlapCount" class="num"># Overlaps</th>
+              <th data-col="totalDedupedSrb" class="num">Deduped SRB $</th>
+              <th data-col="overlappingWith">Overlapping With</th>
+            </tr></thead>
+            <tbody id="leftBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="resize-handle" id="resizer"></div>
+      <div class="panel panel-right">
+        <div class="panel-header">Overlap Detail <span class="count" id="rightCount">0</span></div>
+        <div id="rightSummary" class="right-summary" style="display:none;"></div>
+        <div class="grid-container">
+          <div id="rightEmpty" class="empty-state">Click a territory on the left to view its overlapping territories</div>
+          <table id="rightTable" style="display:none;">
+            <thead><tr>
+              <th data-rcol="territoryCode">Overlapping Territory</th>
+              <th data-rcol="territoryName">Territory Name</th>
+              <th data-rcol="overlapCount" class="num"># Shared MixedIDs</th>
+              <th data-rcol="dedupedSrb" class="num">Deduped SRB $</th>
+            </tr></thead>
+            <tbody id="rightBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /overlapPage -->
+
+<!-- ===== Tab 2: Coin Sort ===== -->
+<div class="tab-page" id="coinSortPage">
+
+  <!-- Shared file imports -->
+  <div class="cs-import-row" style="padding:12px 20px 0;">
+    <div class="cs-import-slot">
+      <label>SRB Source Data</label>
+      <div class="drop-sm" id="csSharedDrop1">Drop srb_refresh CSV or click</div>
+      <input type="file" id="csSharedFile1" accept=".csv" style="display:none">
+    </div>
+    <div class="cs-import-slot">
+      <label>Territory Rules (SYS09B)</label>
+      <div class="drop-sm" id="csSharedDrop2">Drop SYS09B Rules CSV or click</div>
+      <input type="file" id="csSharedFile2" accept=".csv" style="display:none">
+    </div>
+  </div>
+
+  <div class="cs-sub-tabs">
+    <button class="cs-sub-tab active" data-cstab="stPage">Single Territory</button>
+    <button class="cs-sub-tab" data-cstab="bulkPage">Bulk Refresh</button>
+  </div>
+
+  <!-- Sub-tab 1: Single Territory -->
+  <div class="cs-sub-page active" id="stPage">
+    <div class="st-toolbar">
+      <div class="cs-import-slot">
+        <label>Select Territory</label>
+        <select id="stTerrSelect" disabled><option value="">— Import rules first —</option></select>
+      </div>
+      <div class="cs-import-slot">
+        <label>Select Rule</label>
+        <select id="stRuleSelect" disabled><option value="">— Select territory first —</option></select>
+      </div>
+      <button class="cs-run-btn" id="stRunBtn" disabled>Run Coin Sort</button>
+    </div>
+    <div class="st-content" id="stContent">
+      <div class="cs-empty">Import both files and select a territory to run coin sort.</div>
+    </div>
+  </div>
+
+  <!-- Sub-tab 2: Bulk Refresh (existing functionality) -->
+  <div class="cs-sub-page" id="bulkPage">
+    <div class="cs-import-row">
+      <button class="cs-run-btn" id="csRunBtn" disabled>Run Coin Sort</button>
+      <div class="cs-stats" id="csStats"></div>
+      <button class="export-btn" id="csExportBtn" style="display:none">Export Results CSV</button>
+    </div>
+    <div id="csProgress" class="cs-progress" style="display:none"></div>
+    <div class="cs-results" id="csResults">
+      <div class="cs-empty">Import both files and click "Run Coin Sort" to assign MixedIDs to territories.</div>
+    </div>
+  </div>
+</div><!-- /coinSortPage -->
+
+<!-- ========== Side-by-Side Modal ========== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">
+      <span>Territory Comparison</span>
+      <button class="close-btn" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-col" id="modalLeft"></div>
+      <div class="modal-col" id="modalRight"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== CSV Parser ===== */
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/);
+  const result = [];
+  for (const line of lines) {
+    const row = []; let cur = '', inQ = false;
+    for (let j = 0; j < line.length; j++) {
+      const ch = line[j];
+      if (inQ) {
+        if (ch === '"') { if (j+1 < line.length && line[j+1] === '"') { cur += '"'; j++; } else inQ = false; }
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { row.push(cur); cur = ''; }
+        else cur += ch;
+      }
+    }
+    row.push(cur);
+    result.push(row);
+  }
+  return result;
+}
+
+/* ===== Job-type priority groups ===== */
+const JOB_GROUP = { 'RM':'RBC', 'BDR':'RBC', 'CRS':'RBC', 'SPC':'SPC_GRP', 'SPC BDR':'SPC_GRP' };
+const JOB_PRIORITY = { 'RM':1, 'BDR':2, 'CRS':3, 'SPC':1, 'SPC BDR':2 };
+
+/* ===== Overlap computation ===== */
+function computeOverlaps(rows, header) {
+  const col = {}; header.forEach((h,i) => col[h.trim()] = i);
+  const cMixed = col['MIXED ID'], cTerr = col['Territory Code'], cJob = col['Associated Job Type'], cTeam = col['Sales Team'], cSrb = col['VALUE (20xx SRB $)'];
+  const missing = [];
+  if (cMixed===undefined) missing.push('MIXED ID'); if (cTerr===undefined) missing.push('Territory Code');
+  if (cJob===undefined) missing.push('Associated Job Type'); if (cTeam===undefined) missing.push('Sales Team');
+  if (cSrb===undefined) missing.push('VALUE (20xx SRB $)');
+  if (missing.length) throw new Error('Missing columns in SRB file: ' + missing.join(', '));
+  const maxCol = Math.max(cMixed,cTerr,cJob,cTeam,cSrb);
+
+  // Step 1: aggregate SRB per (mixed, terr, job, team)
+  const raw = new Map();
+  for (const row of rows) {
+    if (row.length <= maxCol) continue;
+    const mixed=(row[cMixed]||'').trim(), terr=(row[cTerr]||'').trim(), job=(row[cJob]||'').trim(), team=(row[cTeam]||'').trim();
+    const srb = parseFloat((row[cSrb]||'').trim().replace(/,/g,'')) || 0;
+    if (!mixed||!terr) continue;
+    const key = mixed+'\x00'+terr+'\x00'+job+'\x00'+team;
+    raw.set(key, (raw.get(key)||0)+srb);
+  }
+
+  // Step 2: group by mixed+team using effective group (RM/BDR/CRS -> RBC, SPC/SPC BDR -> SPC_GRP, others keep job type)
+  // Key: mixed+'\x00'+effectiveGroup+'\x00'+team -> { terr -> { srb, job, priority } }
+  const byGroup = new Map();
+  for (const [key, srb] of raw) {
+    const [mixed, terr, job, team] = key.split('\x00');
+    const grp = JOB_GROUP[job] || job;
+    const gKey = mixed+'\x00'+grp+'\x00'+team;
+    if (!byGroup.has(gKey)) byGroup.set(gKey, {});
+    const terrMap = byGroup.get(gKey);
+    if (!terrMap[terr] || srb > terrMap[terr].srb) {
+      terrMap[terr] = { srb, job, priority: JOB_PRIORITY[job] || 0 };
+    }
+  }
+
+  // Step 3: detect overlaps — within each group, flag territories that share the same MixedID
+  // For priority groups (RBC, SPC_GRP), only the highest-priority job type's territories are valid assignments
+  const terrOverlaps = {};
+  for (const [gKey, terrMap] of byGroup) {
+    const terrs = Object.keys(terrMap);
+    if (terrs.length <= 1) continue;
+    const [mixed, grp, team] = gKey.split('\x00');
+    const dedupedSrb = Math.max(...Object.values(terrMap).map(v => v.srb));
+    const isPriorityGroup = (grp === 'RBC' || grp === 'SPC_GRP');
+    const bestPriority = isPriorityGroup ? Math.min(...Object.values(terrMap).map(v => v.priority)) : 0;
+    const sorted = terrs.slice().sort((a,b) => a.length-b.length || a.localeCompare(b));
+    for (const t of sorted) {
+      if (!terrOverlaps[t]) terrOverlaps[t] = [];
+      const entry = terrMap[t];
+      const isWinner = !isPriorityGroup || entry.priority === bestPriority;
+      terrOverlaps[t].push({
+        mixedId: mixed, jobType: entry.job, salesTeam: team,
+        dedupedSrb: Math.round(dedupedSrb*100)/100,
+        overlappingTerritories: sorted.filter(x => x !== t),
+        priorityWinner: isWinner
+      });
+    }
+  }
+
+  const territories = [];
+  for (const tc of Object.keys(terrOverlaps).sort((a,b) => a.length-b.length || a.localeCompare(b))) {
+    const recs = terrOverlaps[tc];
+    const totalSrb = recs.reduce((s,r) => s+r.dedupedSrb, 0);
+    const uniq = new Set(recs.map(r => r.mixedId)).size;
+    const ow = [...new Set(recs.flatMap(r => r.overlappingTerritories))].sort((a,b) => a.length-b.length || a.localeCompare(b));
+    recs.sort((a,b) => b.dedupedSrb - a.dedupedSrb);
+    territories.push({ territoryCode:tc, overlapCount:uniq, totalDedupedSrb:Math.round(totalSrb*100)/100, overlappingWith:ow, records:recs });
+  }
+  territories.sort((a,b) => b.totalDedupedSrb - a.totalDedupedSrb);
+  return territories;
+}
+
+/* ===== Parse Rules file into lookup ===== */
+const RULE_ATTRS = ['TERRITORY NAME','TERRITORY STATUS','HOME BASE','SYSTEM TERRITORY?','CRS ROLLUP TERRITORY?','RULE START DATE','RULE END DATE','NOTES','OU/DOMAIN','WSR','LANGUAGE SPOKEN','WHITESPACE','SRB','STRATEGIC ACCOUNT FLAG','NAMED ACCOUNTS ONLY','CLG FLAG','CRS Flag?','TIERS','USAGE TYPE','PRODUCT USAGE','PARENT SEGMENT','PARENT SUB-SEGMENT','PARENT MICRO-SEGMENT','SEGMENT','SUB-SEGMENT','MICRO-SEGMENT','ACCOUNT FIRST LETTER','PRODUCT L1','PRODUCT L2','PRODUCT L3','PRODUCT L4','PRODUCT NAME','PRODUCT SFDC L5','PRODUCT SFDC L6','WORKFLOW','ACCOUNT LOCATION','REGION','SUB-REGION','COUNTRY','STATE','CITY','Overlay from Territory Name','Overlay from Territory Payee'];
+
+function parseRules(rows, header) {
+  const col = {}; header.forEach((h,i) => col[h.trim()] = i);
+  const cTerr = col['Territory Code'];
+  if (cTerr === undefined) throw new Error('Missing "Territory Code" column in Rules file.');
+  const lookup = {};
+  for (const row of rows) {
+    const tc = (row[cTerr]||'').trim();
+    if (!tc) continue;
+    const attrs = {};
+    for (const a of RULE_ATTRS) {
+      if (col[a] !== undefined) attrs[a] = (row[col[a]]||'').trim();
+    }
+    if (!lookup[tc]) lookup[tc] = [];
+    lookup[tc].push(attrs);
+  }
+  return lookup;
+}
+
+/* ===== Import handling ===== */
+let file1Data = null, file2Data = null, file1Name = '', file2Name = '';
+let RULES = {};
+
+const dz1 = document.getElementById('dropZone1'), fi1 = document.getElementById('fileInput1');
+const dz2 = document.getElementById('dropZone2'), fi2 = document.getElementById('fileInput2');
+const importError = document.getElementById('importError'), importProgress = document.getElementById('importProgress');
+const launchBtn = document.getElementById('launchBtn');
+
+function setupDrop(dz, fi, onLoad) {
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0], dz, onLoad); });
+  fi.addEventListener('change', () => { if (fi.files[0]) readFile(fi.files[0], dz, onLoad); });
+}
+
+function readFile(file, dz, onLoad) {
+  if (!file.name.toLowerCase().endsWith('.csv')) { showError('Please select a .csv file.'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const parsed = parseCSV(reader.result);
+    if (parsed.length < 2) { showError('CSV appears empty.'); return; }
+    onLoad(parsed, file.name);
+    dz.classList.add('loaded');
+    dz.querySelector('.main-text').textContent = 'Loaded';
+    dz.querySelector('.sub-text').textContent = '';
+    let fn = dz.querySelector('.file-name');
+    if (!fn) { fn = document.createElement('div'); fn.className = 'file-name'; dz.appendChild(fn); }
+    fn.textContent = file.name;
+    importError.style.display = 'none';
+    checkReady();
+  };
+  reader.onerror = () => showError('Failed to read file.');
+  reader.readAsText(file);
+}
+
+setupDrop(dz1, fi1, (parsed, name) => { file1Data = parsed; file1Name = name; });
+setupDrop(dz2, fi2, (parsed, name) => { file2Data = parsed; file2Name = name; });
+
+function checkReady() { launchBtn.disabled = !file1Data; }
+
+launchBtn.addEventListener('click', () => {
+  if (!file1Data) return;
+  importError.style.display = 'none';
+  importProgress.style.display = 'block';
+  importProgress.textContent = 'Processing SRB transactions...';
+  setTimeout(() => {
+    try {
+      const h1 = file1Data[0], r1 = file1Data.slice(1).filter(r => r.some(c => c.trim()));
+      const territories = computeOverlaps(r1, h1);
+      if (file2Data) {
+        importProgress.textContent = 'Processing territory rules...';
+        const h2 = file2Data[0], r2 = file2Data.slice(1).filter(r => r.some(c => c.trim()));
+        RULES = parseRules(r2, h2);
+      }
+      importProgress.style.display = 'none';
+      launchApp(territories);
+    } catch (e) { showError(e.message); }
+  }, 30);
+});
+
+function showError(msg) { importError.textContent = msg; importError.style.display = 'block'; importProgress.style.display = 'none'; }
+
+/* ===== Territory name lookup ===== */
+function getTerrName(tc) {
+  const r = RULES[tc];
+  return (r && r.length && r[0]['TERRITORY NAME']) || '';
+}
+
+/* ===== App Logic ===== */
+let DATA = [], filtered = [], selectedTerrIdx = -1;
+let leftSort = { col: 'totalDedupedSrb', dir: 'desc' }, rightSort = { col: 'dedupedSrb', dir: 'desc' };
+const fmt = n => n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+function launchApp(territories) {
+  DATA = territories;
+  for (const t of DATA) t.territoryName = getTerrName(t.territoryCode);
+  document.getElementById('importScreen').style.display = 'none';
+  document.getElementById('overlapResults').style.display = 'flex';
+  document.getElementById('overlapStats').style.display = 'flex';
+  document.getElementById('statTerr').textContent = DATA.length.toLocaleString();
+  const teams=new Set(), jobs=new Set(), tm=new Set();
+  for (const t of DATA) for (const r of t.records) { teams.add(r.salesTeam); jobs.add(r.jobType); tm.add(r.mixedId+'|'+r.jobType+'|'+r.salesTeam); }
+  document.getElementById('statMixed').textContent = tm.size.toLocaleString();
+  const tSel = document.getElementById('filterTeam'); tSel.innerHTML = '<option value="">All Sales Teams</option>';
+  [...teams].sort().forEach(t => { const o=document.createElement('option'); o.value=t; o.textContent=t; tSel.appendChild(o); });
+  const jSel = document.getElementById('filterJob'); jSel.innerHTML = '<option value="">All Job Types</option>';
+  [...jobs].sort().forEach(j => { const o=document.createElement('option'); o.value=j; o.textContent=j; jSel.appendChild(o); });
+  applyFilters();
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('filterTeam').addEventListener('change', applyFilters);
+document.getElementById('filterJob').addEventListener('change', applyFilters);
+document.querySelectorAll('.left-table th[data-col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const c=th.dataset.col;
+    if (leftSort.col===c) leftSort.dir=leftSort.dir==='asc'?'desc':'asc';
+    else { leftSort.col=c; leftSort.dir=c==='territoryCode'||c==='overlappingWith'?'asc':'desc'; }
+    renderLeft();
+  });
+});
+document.querySelectorAll('#rightTable th[data-rcol]').forEach(th => {
+  th.addEventListener('click', () => {
+    const c=th.dataset.rcol;
+    if (rightSort.col===c) rightSort.dir=rightSort.dir==='asc'?'desc':'asc';
+    else { rightSort.col=c; rightSort.dir=c==='dedupedSrb'||c==='overlapCount'?'desc':'asc'; }
+    if (selectedTerrIdx>=0) renderRight(filtered[selectedTerrIdx]);
+  });
+});
+document.getElementById('exportBtn').addEventListener('click', exportDetail);
+document.getElementById('importNewBtn').addEventListener('click', () => {
+  document.getElementById('overlapResults').style.display='none';
+  document.getElementById('overlapStats').style.display='none';
+  document.getElementById('importScreen').style.display='flex';
+  importError.style.display='none'; importProgress.style.display='none';
+  file1Data=null; file2Data=null; RULES={};
+  [dz1,dz2].forEach(dz => { dz.classList.remove('loaded'); dz.querySelector('.main-text').textContent=dz===dz1?'SYS82 SRB Transactions A5':'SYS09B Rules Textlists'; dz.querySelector('.sub-text').textContent='Drop CSV or click to browse'; const fn=dz.querySelector('.file-name'); if(fn) fn.remove(); });
+  fi1.value=''; fi2.value=''; launchBtn.disabled=true;
+});
+initResizer();
+
+function applyFilters() {
+  if (!DATA.length) return;
+  const q=document.getElementById('searchInput').value.trim().toLowerCase(), team=document.getElementById('filterTeam').value, job=document.getElementById('filterJob').value;
+  filtered = DATA.map(t => {
+    if (q && !t.territoryCode.toLowerCase().includes(q) && !(t.territoryName||'').toLowerCase().includes(q)) return null;
+    let recs=t.records;
+    if (team) recs=recs.filter(r=>r.salesTeam===team);
+    if (job) recs=recs.filter(r=>r.jobType===job);
+    if (!recs.length) return null;
+    const ts=recs.reduce((s,r)=>s+r.dedupedSrb,0), um=new Set(recs.map(r=>r.mixedId)).size;
+    const ow=[...new Set(recs.flatMap(r=>r.overlappingTerritories))].sort((a,b)=>a.length-b.length||a.localeCompare(b));
+    return { ...t, records:recs, totalDedupedSrb:ts, overlapCount:um, overlappingWith:ow };
+  }).filter(Boolean);
+  selectedTerrIdx=-1; renderLeft(); clearRight();
+}
+
+function renderLeft() {
+  const c=leftSort.col, m=leftSort.dir==='asc'?1:-1;
+  filtered.sort((a,b) => { const av=a[c],bv=b[c]; if (typeof av==='number') return (av-bv)*m; if (Array.isArray(av)) return (av.length-bv.length)*m; return String(av).localeCompare(String(bv))*m; });
+  document.querySelectorAll('.left-table th').forEach(th => { th.classList.remove('sorted-asc','sorted-desc'); if (th.dataset.col===c) th.classList.add(leftSort.dir==='asc'?'sorted-asc':'sorted-desc'); });
+  document.getElementById('leftCount').textContent=filtered.length.toLocaleString();
+  const tb=document.getElementById('leftBody'); tb.innerHTML='';
+  const fr=document.createDocumentFragment();
+  filtered.forEach((t,i) => {
+    const tr=document.createElement('tr'); if (i===selectedTerrIdx) tr.classList.add('active');
+    tr.addEventListener('click', ()=>selectTerritory(i));
+    tr.innerHTML=`<td class="mono">${t.territoryCode}</td><td title="${(t.territoryName||'').replace(/"/g,'&quot;')}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${t.territoryName||'—'}</td><td class="num mono">${t.overlapCount.toLocaleString()}</td><td class="num srb">$${fmt(t.totalDedupedSrb)}</td><td><div class="terr-tags">${t.overlappingWith.slice(0,8).map(c=>`<span class="terr-tag">${c}</span>`).join('')}${t.overlappingWith.length>8?`<span class="terr-tag" style="opacity:.6">+${t.overlappingWith.length-8}</span>`:''}</div></td>`;
+    fr.appendChild(tr);
+  });
+  tb.appendChild(fr);
+}
+
+function selectTerritory(idx) {
+  selectedTerrIdx=idx;
+  document.querySelectorAll('.left-table tbody tr').forEach((tr,i)=>tr.classList.toggle('active',i===idx));
+  renderRight(filtered[idx]);
+}
+
+// Store current selected territory code for modal
+let currentSelectedTerrCode = '';
+
+function renderRight(terr) {
+  currentSelectedTerrCode = terr.territoryCode;
+  document.getElementById('rightEmpty').style.display='none';
+  document.getElementById('rightTable').style.display='';
+  const sm=document.getElementById('rightSummary'); sm.style.display='flex';
+  sm.innerHTML=`<span><span class="label">Territory:</span><span class="mono">${terr.territoryCode}</span></span><span><span class="label">Overlapping MixedIDs:</span><span class="mono" style="color:var(--accent)">${terr.overlapCount.toLocaleString()}</span></span><span><span class="label">Total Deduped SRB:</span><span class="srb">$${fmt(terr.totalDedupedSrb)}</span></span>`;
+  const byT={};
+  for (const r of terr.records) for (const ot of r.overlappingTerritories) {
+    if (!byT[ot]) byT[ot]={territoryCode:ot,mixedIds:new Set(),dedupedSrb:0};
+    if (!byT[ot].mixedIds.has(r.mixedId)) { byT[ot].mixedIds.add(r.mixedId); byT[ot].dedupedSrb+=r.dedupedSrb; }
+  }
+  let trs=Object.values(byT).map(t=>({territoryCode:t.territoryCode,territoryName:getTerrName(t.territoryCode),overlapCount:t.mixedIds.size,dedupedSrb:t.dedupedSrb}));
+  const c=rightSort.col, m=rightSort.dir==='asc'?1:-1;
+  trs.sort((a,b)=>{const av=a[c],bv=b[c]; if(typeof av==='number') return (av-bv)*m; return String(av).localeCompare(String(bv))*m;});
+  document.querySelectorAll('#rightTable th').forEach(th=>{th.classList.remove('sorted-asc','sorted-desc'); if(th.dataset.rcol===c) th.classList.add(rightSort.dir==='asc'?'sorted-asc':'sorted-desc');});
+  document.getElementById('rightCount').textContent=trs.length.toLocaleString();
+  const tb=document.getElementById('rightBody'); tb.innerHTML='';
+  const fr=document.createDocumentFragment();
+  trs.forEach(r=>{
+    const tr=document.createElement('tr'); tr.style.cursor='pointer';
+    tr.addEventListener('click', () => openModal(currentSelectedTerrCode, r.territoryCode));
+    const tn = getTerrName(r.territoryCode);
+    tr.innerHTML=`<td><span class="terr-tag">${r.territoryCode}</span></td><td title="${(tn||'').replace(/"/g,'&quot;')}" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${tn||'—'}</td><td class="num mono">${r.overlapCount.toLocaleString()}</td><td class="num srb">$${fmt(r.dedupedSrb)}</td>`;
+    fr.appendChild(tr);
+  });
+  tb.appendChild(fr);
+}
+
+function clearRight() { document.getElementById('rightEmpty').style.display=''; document.getElementById('rightTable').style.display='none'; document.getElementById('rightSummary').style.display='none'; document.getElementById('rightCount').textContent='0'; }
+
+function jumpToTerritory(code) {
+  document.getElementById('searchInput').value=code; document.getElementById('filterTeam').value=''; document.getElementById('filterJob').value='';
+  applyFilters();
+  if (filtered.length) { const i=filtered.findIndex(t=>t.territoryCode===code); selectTerritory(i>=0?i:0); }
+}
+
+/* ===== Modal ===== */
+const modalOverlay = document.getElementById('modalOverlay');
+document.getElementById('modalClose').addEventListener('click', () => modalOverlay.classList.remove('open'));
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); });
+
+function buildAttrHtml(terrCode, otherTerrCode) {
+  const ruleRows = RULES[terrCode];
+  if (!ruleRows || !ruleRows.length) return `<h3>Territory <span class="terr-code">${terrCode}</span></h3><div class="no-attrs">No attributes found in Rules file for this territory.</div>`;
+  const otherRows = RULES[otherTerrCode] || [];
+  const otherVals = {};
+  if (otherRows.length) for (const a of RULE_ATTRS) otherVals[a] = otherRows[0][a] || '';
+
+  let html = `<h3>Territory <span class="terr-code">${terrCode}</span></h3><table class="attr-table">`;
+  const row = ruleRows[0];
+  for (const a of RULE_ATTRS) {
+    const val = row[a] || '';
+    if (!val && !(otherVals[a])) continue;
+    const diff = otherRows.length && otherVals[a] !== val;
+    html += `<tr${diff?' class="diff"':''}><td>${a}</td><td>${val || '—'}</td></tr>`;
+  }
+  html += '</table>';
+  return html;
+}
+
+function openModal(terrCode1, terrCode2) {
+  if (!Object.keys(RULES).length) {
+    document.getElementById('modalLeft').innerHTML = `<h3>Territory <span class="terr-code">${terrCode1}</span></h3><div class="no-attrs">No Rules file was imported. Import the SYS09B Rules Textlists CSV to see territory attributes.</div>`;
+    document.getElementById('modalRight').innerHTML = `<h3>Territory <span class="terr-code">${terrCode2}</span></h3><div class="no-attrs">No Rules file was imported.</div>`;
+  } else {
+    document.getElementById('modalLeft').innerHTML = buildAttrHtml(terrCode1, terrCode2);
+    document.getElementById('modalRight').innerHTML = buildAttrHtml(terrCode2, terrCode1);
+  }
+  modalOverlay.classList.add('open');
+}
+
+/* ===== Export ===== */
+function exportDetail() {
+  if (selectedTerrIdx<0) return;
+  const terr=filtered[selectedTerrIdx], byT={};
+  for (const r of terr.records) for (const ot of r.overlappingTerritories) {
+    if (!byT[ot]) byT[ot]={mixedIds:new Set(),dedupedSrb:0};
+    if (!byT[ot].mixedIds.has(r.mixedId)) { byT[ot].mixedIds.add(r.mixedId); byT[ot].dedupedSrb+=r.dedupedSrb; }
+  }
+  const esc = s => '"' + (s||'').replace(/"/g,'""') + '"';
+  let csv='Territory,Territory Name,Overlapping Territory,Overlapping Territory Name,# Shared MixedIDs,Deduped SRB $\n';
+  for (const [ot,v] of Object.entries(byT).sort((a,b)=>b[1].dedupedSrb-a[1].dedupedSrb))
+    csv+=`${esc(terr.territoryCode)},${esc(getTerrName(terr.territoryCode))},${esc(ot)},${esc(getTerrName(ot))},${v.mixedIds.size},${v.dedupedSrb.toFixed(2)}\n`;
+  const blob=new Blob([csv],{type:'text/csv'}), a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=`Overlap_Detail_Territory_${terr.territoryCode}.csv`; a.click();
+}
+
+/* ===== Resizer ===== */
+function initResizer() {
+  const rs=document.getElementById('resizer'), lf=document.getElementById('panelLeft');
+  let sx,sw;
+  rs.addEventListener('mousedown',e=>{sx=e.clientX;sw=lf.offsetWidth;document.addEventListener('mousemove',mv);document.addEventListener('mouseup',()=>document.removeEventListener('mousemove',mv),{once:true});});
+  function mv(e){const w=sw+(e.clientX-sx),p=(w/window.innerWidth)*100;if(p>20&&p<70)lf.style.width=p+'%';}
+}
+
+/* ===== Tab Switching ===== */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===== Coin Sort Sub-Tab Switching ===== */
+document.querySelectorAll('.cs-sub-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cs-sub-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cs-sub-page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.cstab).classList.add('active');
+  });
+});
+
+/* ===== Shared Coin Sort File Imports ===== */
+let csSharedSrbData = null, csSharedRulesData = null;
+let stResults = [], stTerrList = [];
+
+function setupCsDrop(dz, fi, onLoad) {
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); if (e.dataTransfer.files[0]) readCsFile(e.dataTransfer.files[0], dz, onLoad); });
+  fi.addEventListener('change', () => { if (fi.files[0]) readCsFile(fi.files[0], dz, onLoad); });
+}
+
+function readCsFile(file, dz, onLoad) {
+  if (!file.name.toLowerCase().endsWith('.csv')) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const parsed = parseCSV(reader.result);
+    if (parsed.length < 2) return;
+    onLoad(parsed);
+    dz.classList.add('loaded');
+    dz.textContent = file.name;
+  };
+  reader.readAsText(file);
+}
+
+const csSharedDrop1 = document.getElementById('csSharedDrop1'), csSharedFileIn1 = document.getElementById('csSharedFile1');
+const csSharedDrop2 = document.getElementById('csSharedDrop2'), csSharedFileIn2 = document.getElementById('csSharedFile2');
+
+function onSharedSrbLoaded(d) {
+  csSharedSrbData = d;
+  checkStReady();
+  checkBulkReady();
+}
+function onSharedRulesLoaded(d) {
+  csSharedRulesData = d;
+  populateTerrSelect();
+  checkStReady();
+  checkBulkReady();
+}
+
+setupCsDrop(csSharedDrop1, csSharedFileIn1, onSharedSrbLoaded);
+setupCsDrop(csSharedDrop2, csSharedFileIn2, onSharedRulesLoaded);
+
+// Single Territory controls
+const stTerrSelect = document.getElementById('stTerrSelect');
+const stRunBtn = document.getElementById('stRunBtn');
+
+// stParsedRules: { terrCode -> { terrName, rules: [{ ruleCode, ... }] } }
+let stParsedRules = {};
+
+function populateTerrSelect() {
+  if (!csSharedRulesData) return;
+  const header = csSharedRulesData[0].map(h => h.trim());
+  const rci = header.indexOf('Territory Rule Code');
+  const tci = header.indexOf('Territory Code');
+  const tni = header.indexOf('TERRITORY NAME');
+  const srbFlagIdx = header.indexOf('SRB');
+  if (tci < 0) return;
+
+  stParsedRules = {};
+  for (let i = 1; i < csSharedRulesData.length; i++) {
+    const row = csSharedRulesData[i];
+    if (srbFlagIdx >= 0 && (row[srbFlagIdx]||'').trim().toUpperCase() === 'FALSE') continue;
+    const tc = (row[tci]||'').trim();
+    if (!tc) continue;
+    const rc = rci >= 0 ? (row[rci]||'').trim() : tc;
+    const tn = tni >= 0 ? (row[tni]||'').trim() : '';
+    if (!stParsedRules[tc]) stParsedRules[tc] = { terrName: tn, rules: [] };
+    stParsedRules[tc].rules.push(rc);
+  }
+
+  stTerrSelect.disabled = false;
+  stTerrSelect.innerHTML = '<option value="">— Select a territory —</option>';
+  const sorted = Object.entries(stParsedRules).sort((a,b) => a[0].length - b[0].length || a[0].localeCompare(b[0]));
+  // Also rebuild stTerrList for lookups in summary/detail
+  stTerrList = [];
+  for (const [tc, info] of sorted) {
+    const o = document.createElement('option');
+    o.value = tc;
+    o.textContent = info.terrName ? tc + ' — ' + info.terrName : tc;
+    stTerrSelect.appendChild(o);
+    for (const rc of info.rules) {
+      stTerrList.push([rc, { terrCode: tc, terrName: info.terrName }]);
+    }
+  }
+  stRuleSelect.disabled = true;
+  stRuleSelect.innerHTML = '<option value="">— Select territory first —</option>';
+}
+
+const stRuleSelect = document.getElementById('stRuleSelect');
+
+function populateRuleSelect() {
+  const tc = stTerrSelect.value;
+  stRuleSelect.innerHTML = '';
+  if (!tc || !stParsedRules[tc]) {
+    stRuleSelect.disabled = true;
+    stRuleSelect.innerHTML = '<option value="">— Select territory first —</option>';
+    checkStReady();
+    return;
+  }
+  const rules = stParsedRules[tc].rules;
+  if (rules.length === 1) {
+    const o = document.createElement('option');
+    o.value = rules[0];
+    o.textContent = rules[0];
+    stRuleSelect.appendChild(o);
+    stRuleSelect.disabled = false;
+  } else {
+    stRuleSelect.innerHTML = '<option value="">— Select a rule (' + rules.length + ' available) —</option>';
+    for (const rc of rules) {
+      const o = document.createElement('option');
+      o.value = rc;
+      o.textContent = rc;
+      stRuleSelect.appendChild(o);
+    }
+    stRuleSelect.disabled = false;
+  }
+  checkStReady();
+}
+
+function checkStReady() {
+  stRunBtn.disabled = !(csSharedSrbData && csSharedRulesData && stTerrSelect.value && stRuleSelect.value);
+}
+stTerrSelect.addEventListener('change', () => { populateRuleSelect(); checkStReady(); });
+stRuleSelect.addEventListener('change', checkStReady);
+
+function runSingleTerrCoinSort(ruleCode) {
+  if (!csSharedSrbData || !csSharedRulesData) return [];
+  const rulesHeader = csSharedRulesData[0].map(h => h.trim());
+  const ruleCol = {}; rulesHeader.forEach((h,i) => ruleCol[h] = i);
+  const rcIdx = ruleCol['Territory Rule Code'];
+  const tcIdx = ruleCol['Territory Code'];
+  const keyIdx = rcIdx !== undefined ? rcIdx : tcIdx;
+  if (keyIdx === undefined) throw new Error('Missing "Territory Rule Code" or "Territory Code" in rules file.');
+
+  // Find the matching rule row(s) by rule code, skip SRB=FALSE
+  const srbFlagIdx = ruleCol['SRB'];
+  let terrCode = ruleCode;
+  const terrRules = [];
+  for (let i = 1; i < csSharedRulesData.length; i++) {
+    const row = csSharedRulesData[i];
+    if (srbFlagIdx !== undefined && (row[srbFlagIdx]||'').trim().toUpperCase() === 'FALSE') continue;
+    const rc = (row[keyIdx]||'').trim();
+    if (rc !== ruleCode) continue;
+    if (tcIdx !== undefined) terrCode = (row[tcIdx]||'').trim() || ruleCode;
+    const parsedAttrs = {};
+    for (const am of ATTR_MAP) {
+      const ri = ruleCol[am.rule];
+      parsedAttrs[am.rule] = ri !== undefined ? parseRuleCell(row[ri] || '') : null;
+    }
+    terrRules.push(parsedAttrs);
+  }
+  if (!terrRules.length) return [];
+
+  const srbHeader = csSharedSrbData[0].map(h => h.trim());
+  const srbCol = {}; srbHeader.forEach((h,i) => srbCol[h] = i);
+  const cMixed = srbCol['Mixed ID'];
+  const cSrb = srbCol['20XX SRB $'];
+  if (cMixed === undefined) throw new Error('Missing "Mixed ID" column in SRB source file.');
+
+  const results = [];
+  for (let i = 1; i < csSharedSrbData.length; i++) {
+    const row = csSharedSrbData[i];
+    if (!row.some(c => c.trim())) continue;
+    const mixedId = (row[cMixed]||'').trim();
+    if (!mixedId) continue;
+    const srbVal = parseFloat((row[cSrb]||'').replace(/,/g,'')) || 0;
+    const srbAttrs = {};
+    for (const am of ATTR_MAP) {
+      const si = srbCol[am.srb];
+      srbAttrs[am.rule] = am.norm(si !== undefined ? (row[si]||'').trim() : '');
+    }
+    let matched = false;
+    for (const parsedRule of terrRules) {
+      let ruleMatch = true;
+      for (const am of ATTR_MAP) {
+        const pr = parsedRule[am.rule];
+        if (!pr) continue;
+        const sv = srbAttrs[am.rule];
+        if (!sv) { if (pr.inc) { ruleMatch = false; break; } continue; }
+        const useFuzzy = am.rule.includes('MICRO');
+        if (useFuzzy ? !cellMatchesContains(pr, sv) : !cellMatches(pr, sv)) { ruleMatch = false; break; }
+      }
+      if (ruleMatch) { matched = true; break; }
+    }
+    if (matched) {
+      const rawAttrs = {};
+      for (const am of ATTR_MAP) {
+        const si = srbCol[am.srb];
+        rawAttrs[am.rule] = si !== undefined ? (row[si]||'').trim() : '';
+      }
+      results.push({ mixedId, territoryCode: terrCode, ruleCode, srb: srbVal, attrs: rawAttrs });
+    }
+  }
+  return results;
+}
+
+stRunBtn.addEventListener('click', () => {
+  const ruleCode = stRuleSelect.value;
+  if (!ruleCode || !csSharedSrbData || !csSharedRulesData) return;
+  const content = document.getElementById('stContent');
+  content.innerHTML = '<div class="cs-progress">Running coin sort for rule ' + ruleCode + '...</div>';
+  setTimeout(() => {
+    try {
+      stResults = runSingleTerrCoinSort(ruleCode);
+      if (!stResults.length) {
+        content.innerHTML = '<div class="st-no-match">No MixedIDs matched the rules for <strong>' + ruleCode + '</strong>.</div>';
+        return;
+      }
+      const uniqueMixed = new Set(stResults.map(r => r.mixedId)).size;
+      const dedupedMap = new Map();
+      for (const r of stResults) {
+        const cur = dedupedMap.get(r.mixedId) || 0;
+        if (r.srb > cur) dedupedMap.set(r.mixedId, r.srb);
+      }
+      let dedupedSrb = 0;
+      for (const v of dedupedMap.values()) dedupedSrb += v;
+      showStSummary(ruleCode, uniqueMixed, dedupedSrb);
+    } catch (e) {
+      content.innerHTML = '<div class="cs-progress" style="color:var(--red)">Error: ' + e.message + '</div>';
+    }
+  }, 30);
+});
+
+function getStTerrAttrs(ruleCode) {
+  if (!csSharedRulesData) return [];
+  const header = csSharedRulesData[0].map(h => h.trim());
+  const col = {}; header.forEach((h,i) => col[h] = i);
+  const rci = col['Territory Rule Code'];
+  const tci = col['Territory Code'];
+  const keyIdx = rci !== undefined ? rci : tci;
+  if (keyIdx === undefined) return [];
+  const ruleRows = [];
+  for (let i = 1; i < csSharedRulesData.length; i++) {
+    if ((csSharedRulesData[i][keyIdx]||'').trim() === ruleCode) ruleRows.push(csSharedRulesData[i]);
+  }
+  if (!ruleRows.length) return [];
+  const attrs = [];
+  for (const a of RULE_ATTRS) {
+    if (col[a] === undefined) continue;
+    const vals = [...new Set(ruleRows.map(r => (r[col[a]]||'').trim()).filter(Boolean))];
+    if (vals.length) attrs.push({ name: a, value: vals.join(' | ') });
+  }
+  return attrs;
+}
+
+function showStSummary(ruleCode, matchCount, dedupedSrb) {
+  const info = stTerrList.find(t => t[0] === ruleCode)?.[1] || {};
+  const terrCode = info.terrCode || '';
+  const terrName = info.terrName || '';
+  const fmtSrb = dedupedSrb.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const attrs = getStTerrAttrs(ruleCode);
+  let attrHtml = '';
+  if (attrs.length) {
+    attrHtml = '<div class="st-attrs"><div class="st-attrs-toggle" id="stAttrsToggle">Rule Attributes &#9660;</div><div class="st-attrs-body" id="stAttrsBody"><table class="attr-table">';
+    for (const a of attrs) {
+      const escaped = a.value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      attrHtml += '<tr><td class="attr-label">' + a.name + '</td><td class="attr-val">' + escaped + '</td></tr>';
+    }
+    attrHtml += '</table></div></div>';
+  }
+  const subtitle = terrCode ? '<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Territory: <strong>' + terrCode + '</strong>' + (terrName ? ' — ' + terrName : '') + '</div>' : '';
+  const content = document.getElementById('stContent');
+  content.innerHTML = `
+    <div class="st-summary" style="max-width:720px">
+      <h2>Rule ${ruleCode}</h2>
+      ${subtitle}
+      <div class="st-metrics">
+        <div class="st-metric"><div class="num">${matchCount.toLocaleString()}</div><div class="lbl">Matched MixedIDs</div></div>
+        <div class="st-metric"><div class="num">$${fmtSrb}</div><div class="lbl">Total Deduped SRB $</div></div>
+      </div>
+      ${attrHtml}
+      <div class="st-actions">
+        <button class="st-btn-primary" id="stBtnReview">Review MixedID Details</button>
+        <button class="st-btn-success" id="stBtnConfirm">Confirm &amp; Export</button>
+        <button class="st-btn-outline" id="stBtnRerun">Refresh Rules &amp; Rerun</button>
+      </div>
+    </div>`;
+  if (attrs.length) {
+    const toggle = document.getElementById('stAttrsToggle');
+    const body = document.getElementById('stAttrsBody');
+    toggle.addEventListener('click', () => {
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : '';
+      toggle.innerHTML = 'Rule Attributes ' + (open ? '&#9660;' : '&#9650;');
+    });
+  }
+  document.getElementById('stBtnReview').addEventListener('click', () => showStDetails(ruleCode));
+  document.getElementById('stBtnConfirm').addEventListener('click', () => exportStResults(ruleCode));
+  document.getElementById('stBtnRerun').addEventListener('click', () => {
+    csSharedFileIn2.value = '';
+    csSharedFileIn2.click();
+  });
+}
+
+function showStDetails(ruleCode) {
+  const content = document.getElementById('stContent');
+  const display = stResults.slice(0, 5000);
+  const ruleAttrs = getStTerrAttrs(ruleCode);
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  let html = '<div class="st-detail-actions">';
+  html += '<button class="st-btn-success" id="stDetailConfirm">Confirm &amp; Export</button>';
+  html += '<button class="st-btn-outline" id="stDetailRerun">Rerun</button>';
+  html += '<button class="st-btn-outline" id="stDetailBack">Back to Summary</button>';
+  html += '<span class="cs-stats">Showing ' + Math.min(stResults.length, 5000).toLocaleString() + ' of ' + stResults.length.toLocaleString() + ' results</span>';
+  html += '</div>';
+  html += '<div class="cs-results"><table><thead><tr><th style="width:36px"></th><th>MIXED ID</th><th>Territory Code</th><th class="num">SRB $</th></tr></thead><tbody>';
+  for (let idx = 0; idx < display.length; idx++) {
+    const r = display[idx];
+    html += '<tr class="st-row-main" data-idx="' + idx + '" style="cursor:pointer">';
+    html += '<td class="st-expand-icon">&#9654;</td>';
+    html += '<td class="mono">' + r.mixedId + '</td><td class="mono">' + r.territoryCode + '</td>';
+    html += '<td class="num srb">$' + r.srb.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td></tr>';
+    html += '<tr class="st-row-detail" data-idx="' + idx + '" style="display:none"><td colspan="4"><div class="st-compare">';
+    html += '<div class="st-compare-col"><div class="st-compare-title">Rule — ' + esc(ruleCode) + '</div><table class="st-cmp-table">';
+    for (const a of ruleAttrs) {
+      html += '<tr><td class="st-cmp-label">' + esc(a.name) + '</td><td class="st-cmp-val">' + esc(a.value) + '</td></tr>';
+    }
+    if (!ruleAttrs.length) html += '<tr><td colspan="2" style="color:var(--text-muted)">No rule attributes</td></tr>';
+    html += '</table></div>';
+    html += '<div class="st-compare-col"><div class="st-compare-title">MixedID — ' + esc(r.mixedId) + '</div><table class="st-cmp-table">';
+    for (const am of ATTR_MAP) {
+      const rv = r.attrs ? (r.attrs[am.rule] || '') : '';
+      if (!rv && !ruleAttrs.find(a => a.name === am.rule)) continue;
+      html += '<tr><td class="st-cmp-label">' + esc(am.rule) + '</td><td class="st-cmp-val">' + (esc(rv) || '<span style="color:var(--text-muted)">—</span>') + '</td></tr>';
+    }
+    html += '</table></div></div></td></tr>';
+  }
+  html += '</tbody></table></div>';
+  if (stResults.length > 5000) html += '<div class="cs-empty">Showing first 5,000 of ' + stResults.length.toLocaleString() + ' results. Export CSV for full data.</div>';
+  content.innerHTML = html;
+
+  content.querySelectorAll('.st-row-main').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const idx = tr.dataset.idx;
+      const detail = content.querySelector('.st-row-detail[data-idx="' + idx + '"]');
+      const icon = tr.querySelector('.st-expand-icon');
+      if (detail.style.display === 'none') {
+        detail.style.display = '';
+        icon.innerHTML = '&#9660;';
+      } else {
+        detail.style.display = 'none';
+        icon.innerHTML = '&#9654;';
+      }
+    });
+  });
+  document.getElementById('stDetailConfirm').addEventListener('click', () => exportStResults(ruleCode));
+  document.getElementById('stDetailRerun').addEventListener('click', () => stRunBtn.click());
+  document.getElementById('stDetailBack').addEventListener('click', () => {
+    const uniqueMixed = new Set(stResults.map(r => r.mixedId)).size;
+    const dedupedMap = new Map();
+    for (const r of stResults) { const cur = dedupedMap.get(r.mixedId) || 0; if (r.srb > cur) dedupedMap.set(r.mixedId, r.srb); }
+    let dedupedSrb = 0; for (const v of dedupedMap.values()) dedupedSrb += v;
+    showStSummary(ruleCode, uniqueMixed, dedupedSrb);
+  });
+}
+
+function exportStResults(ruleCode) {
+  if (!stResults.length) return;
+  let csv = 'New P7 Code,MIXED ID,Territory Code,VALUE (20xx SRB $)\n';
+  for (const r of stResults) {
+    csv += '"' + r.mixedId + '|' + r.territoryCode + '","' + r.mixedId + '","' + r.territoryCode + '",' + r.srb + '\n';
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'CoinSort_Rule_' + ruleCode.replace(/\|/g, '_') + '.csv';
+  a.click();
+}
+
+/* ===== Bulk Coin Sort ===== */
+let csResults = [];
+const csRunBtn = document.getElementById('csRunBtn');
+
+function checkBulkReady() {
+  csRunBtn.disabled = !(csSharedSrbData && csSharedRulesData);
+}
+
+/* --- Normalization helpers --- */
+function normalize(val) {
+  if (!val || val === 'NULL') return '';
+  return val.trim().toLowerCase().replace(/&/g, ' & ').replace(/\s+/g, ' ');
+}
+
+const TIER_MAP = { 't1': 'tier 1', 't2': 'tier 2', 't3': 'tier 3', 't4': 'tier 4', 't': '' };
+const SEGMENT_ALIASES = {
+  'corporates': 'corporate',
+  'government and education': 'government',
+  'professional services': 'professional services',
+};
+
+function normTier(val) {
+  const v = (val||'').trim().toLowerCase();
+  return TIER_MAP[v] || v;
+}
+
+function normSegment(val) {
+  const v = (val||'').trim().toLowerCase();
+  return SEGMENT_ALIASES[v] || v;
+}
+
+function normMicro(val) {
+  if (!val || val === '0' || val === 'NULL') return '';
+  return val.replace(/_RL[23]$/,'').replace(/&/g,' & ').replace(/,/g,', ').replace(/([a-z])([A-Z])/g,'$1 $2').trim().toLowerCase().replace(/\s+/g,' ');
+}
+
+function normSubRegion(val) {
+  const v = (val||'').trim().toLowerCase();
+  if (v === 'usa sub region') return 'usa';
+  return v;
+}
+
+/* --- Parse INCLUSION/EXCLUSION from a rule cell --- */
+function parseRuleCell(cellValue) {
+  if (!cellValue || !cellValue.trim()) return null; // wildcard
+  const parts = cellValue.split('|').map(s => s.trim()).filter(Boolean);
+  const inclusions = [], exclusions = [];
+  for (const part of parts) {
+    const lower = part.toLowerCase();
+    if (lower.startsWith('inclusion:')) {
+      const vals = part.substring(part.indexOf(':')+1).split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+      inclusions.push(...vals);
+    } else if (lower.startsWith('exclusion:')) {
+      const vals = part.substring(part.indexOf(':')+1).split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+      exclusions.push(...vals);
+    }
+  }
+  if (!inclusions.length && !exclusions.length) return null;
+  return { inc: inclusions.length ? new Set(inclusions) : null, exc: exclusions.length ? new Set(exclusions) : null };
+}
+
+function cellMatches(parsedRule, srbValue) {
+  if (!parsedRule) return true; // wildcard
+  const v = srbValue.toLowerCase();
+  if (parsedRule.exc && parsedRule.exc.has(v)) return false;
+  if (parsedRule.inc) return parsedRule.inc.has(v);
+  return true;
+}
+
+function cellMatchesContains(parsedRule, srbValue) {
+  if (!parsedRule) return true;
+  const v = srbValue.toLowerCase();
+  if (parsedRule.exc) {
+    for (const ex of parsedRule.exc) { if (v.includes(ex) || ex.includes(v)) return false; }
+  }
+  if (parsedRule.inc) {
+    for (const inc of parsedRule.inc) { if (v.includes(inc) || inc.includes(v)) return true; }
+    return false;
+  }
+  return true;
+}
+
+/* --- Attribute mapping: rule column -> SRB column + normalizer --- */
+const ATTR_MAP = [
+  { rule: 'REGION',              srb: 'Region Anaplan Code',               norm: normalize },
+  { rule: 'SUB-REGION',          srb: 'Sub-Region Anaplan Code',           norm: normSubRegion },
+  { rule: 'COUNTRY',             srb: 'Country Anaplan Code',              norm: normalize },
+  { rule: 'STATE',               srb: 'State Anaplan Code',                norm: normalize },
+  { rule: 'CITY',                srb: 'City Anaplan Code',                 norm: normalize },
+  { rule: 'PARENT SEGMENT',      srb: 'Parent Segment Anaplan Code',       norm: normSegment },
+  { rule: 'SEGMENT',             srb: 'Segment Anaplan Code',              norm: normSegment },
+  { rule: 'PARENT SUB-SEGMENT',  srb: 'Parent Sub-Segment Anaplan Code',   norm: normalize },
+  { rule: 'SUB-SEGMENT',         srb: 'Sub-Segment Anaplan Code',          norm: normalize },
+  { rule: 'PARENT MICRO-SEGMENT',srb: 'Parent Reporting Micro-Segment Anaplan Code', norm: normMicro },
+  { rule: 'MICRO-SEGMENT',       srb: 'Reporting Micro-Segment Anaplan Code', norm: normMicro },
+  { rule: 'TIERS',               srb: 'Tier',                              norm: normTier },
+  { rule: 'USAGE TYPE',          srb: 'Usage Type Anaplan Code',           norm: normalize },
+  { rule: 'PRODUCT USAGE',       srb: 'Product Usage Anaplan Code',        norm: normalize },
+  { rule: 'WORKFLOW',            srb: 'Workflow__c',                        norm: normalize },
+  { rule: 'STRATEGIC ACCOUNT FLAG', srb: 'Strategic Account',              norm: normalize },
+];
+
+/* --- Main coin sort engine --- */
+function runCoinSort(srbParsed, rulesParsed) {
+  const srbHeader = srbParsed[0].map(h => h.trim());
+  const rulesHeader = rulesParsed[0].map(h => h.trim());
+  const srbRows = srbParsed.slice(1).filter(r => r.some(c => c.trim()));
+  const rulesRows = rulesParsed.slice(1).filter(r => r.some(c => c.trim()));
+
+  const srbCol = {}; srbHeader.forEach((h,i) => srbCol[h] = i);
+  const ruleCol = {}; rulesHeader.forEach((h,i) => ruleCol[h] = i);
+
+  const cMixed = srbCol['Mixed ID'];
+  const cSrb = srbCol['20XX SRB $'];
+  if (cMixed === undefined) throw new Error('Missing "Mixed ID" column in SRB source file.');
+
+  // Pre-parse all rules at rule-code level (skip SRB=FALSE)
+  const terrIdx = ruleCol['Territory Code'];
+  const rcIdx = ruleCol['Territory Rule Code'];
+  if (terrIdx === undefined) throw new Error('Missing "Territory Code" in rules file.');
+  const bulkSrbFlagIdx = ruleCol['SRB'];
+
+  const ruleMap = {};
+  for (const row of rulesRows) {
+    if (bulkSrbFlagIdx !== undefined && (row[bulkSrbFlagIdx]||'').trim().toUpperCase() === 'FALSE') continue;
+    const tc = (row[terrIdx]||'').trim();
+    if (!tc) continue;
+    const rc = rcIdx !== undefined ? (row[rcIdx]||'').trim() : tc;
+    if (!rc) continue;
+    const parsedAttrs = {};
+    for (const am of ATTR_MAP) {
+      const ri = ruleCol[am.rule];
+      if (ri !== undefined) {
+        parsedAttrs[am.rule] = parseRuleCell(row[ri] || '');
+      } else {
+        parsedAttrs[am.rule] = null;
+      }
+    }
+    if (!ruleMap[rc]) ruleMap[rc] = { ruleCode: rc, terrCode: tc, rules: [] };
+    ruleMap[rc].rules.push(parsedAttrs);
+  }
+  const ruleList = Object.values(ruleMap);
+
+  // For each SRB row, check against all rule codes
+  const results = [];
+  for (const row of srbRows) {
+    const mixedId = (row[cMixed]||'').trim();
+    if (!mixedId) continue;
+    const srbVal = parseFloat((row[cSrb]||'').replace(/,/g,'')) || 0;
+
+    const srbAttrs = {};
+    for (const am of ATTR_MAP) {
+      const si = srbCol[am.srb];
+      const raw = si !== undefined ? (row[si]||'').trim() : '';
+      srbAttrs[am.rule] = am.norm(raw);
+    }
+
+    for (const entry of ruleList) {
+      let matched = false;
+      for (const parsedRule of entry.rules) {
+        let ruleMatch = true;
+        for (const am of ATTR_MAP) {
+          const pr = parsedRule[am.rule];
+          if (!pr) continue;
+          const sv = srbAttrs[am.rule];
+          if (!sv) {
+            if (pr.inc) { ruleMatch = false; break; }
+            continue;
+          }
+          const useFuzzy = am.rule.includes('MICRO');
+          if (useFuzzy ? !cellMatchesContains(pr, sv) : !cellMatches(pr, sv)) {
+            ruleMatch = false;
+            break;
+          }
+        }
+        if (ruleMatch) { matched = true; break; }
+      }
+      if (matched) {
+        results.push({ mixedId, ruleCode: entry.ruleCode, territoryCode: entry.terrCode, srb: srbVal });
+      }
+    }
+  }
+  return results;
+}
+
+/* --- Coin sort UI --- */
+csRunBtn.addEventListener('click', () => {
+  if (!csSharedSrbData || !csSharedRulesData) return;
+  const prog = document.getElementById('csProgress');
+  prog.style.display = 'block';
+  prog.textContent = 'Running coin sort... this may take a moment.';
+  document.getElementById('csResults').innerHTML = '';
+  document.getElementById('csExportBtn').style.display = 'none';
+
+  setTimeout(() => {
+    try {
+      csResults = runCoinSort(csSharedSrbData, csSharedRulesData);
+      prog.style.display = 'none';
+
+      const uniqueMixed = new Set(csResults.map(r => r.mixedId)).size;
+      const uniqueRules = new Set(csResults.map(r => r.ruleCode)).size;
+      const uniqueTerr = new Set(csResults.map(r => r.territoryCode)).size;
+      document.getElementById('csStats').innerHTML =
+        `Assignments: <span class="val">${csResults.length.toLocaleString()}</span> &nbsp; MixedIDs: <span class="val">${uniqueMixed.toLocaleString()}</span> &nbsp; Rules: <span class="val">${uniqueRules.toLocaleString()}</span> &nbsp; Territories: <span class="val">${uniqueTerr.toLocaleString()}</span>`;
+
+      renderCsResults();
+      document.getElementById('csExportBtn').style.display = '';
+    } catch (e) {
+      prog.textContent = 'Error: ' + e.message;
+      prog.style.color = 'var(--red)';
+    }
+  }, 30);
+});
+
+function renderCsResults() {
+  const container = document.getElementById('csResults');
+  if (!csResults.length) { container.innerHTML = '<div class="cs-empty">No matches found.</div>'; return; }
+
+  const display = csResults.slice(0, 5000);
+  let html = '<table><thead><tr><th>MIXED ID</th><th>Rule Code</th><th>Territory Code</th><th class="num">SRB $</th></tr></thead><tbody>';
+  for (const r of display) {
+    html += `<tr><td class="mono">${r.mixedId}</td><td class="mono">${r.ruleCode}</td><td class="mono">${r.territoryCode}</td><td class="num srb">$${r.srb.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  if (csResults.length > 5000) html += `<div class="cs-empty">Showing first 5,000 of ${csResults.length.toLocaleString()} results. Export CSV for full data.</div>`;
+  container.innerHTML = html;
+}
+
+document.getElementById('csExportBtn').addEventListener('click', () => {
+  if (!csResults.length) return;
+  let csv = 'New P7 Code,MIXED ID,Territory Rule Code,Territory Code,VALUE (20xx SRB $)\n';
+  for (const r of csResults) {
+    csv += `"${r.mixedId}|${r.ruleCode}","${r.mixedId}","${r.ruleCode}","${r.territoryCode}",${r.srb}\n`;
+  }
+  const blob = new Blob([csv], { type: 'text/csv' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'CoinSort_Assignments.csv';
+  a.click();
+});
+</script>
+</body>
+</html>
