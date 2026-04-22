@@ -27,7 +27,7 @@
      Anything that isn't one of those three is ink (#0A0A0A) or a gray.
      Deliberately flat: no gradients, no chiaroscuro shadows on data surfaces.
      ========================================================================= */
-  :root, [data-theme="light"] {
+  :root {
     --bg:             #FFFFFF;             /* pure white canvas */
     --surface:        #FFFFFF;
     --surface-hover:  #F4F6FA;             /* cool, near-white hover */
@@ -95,45 +95,6 @@
     --dens-row-h: 24px;
   }
 
-  [data-theme="dark"] {
-    /* Dark mode: ink night, brightened Moody's triad. Same rule as light:
-       only red / blue / yellow — no green, no amber. */
-    --bg:             #0D0D0D;
-    --surface:        #161616;
-    --surface-hover:  #1E1E1E;
-    --surface-active: #262626;
-    --surface-raised: #161616;        /* match surface — no warm raised tone */
-    --border:         #2A2A2A;
-    --border-strong:  #F2F4F8;        /* cool white for highlight rules */
-    --text:           #F2F4F8;        /* cool paper white */
-    --text-muted:     #A1A6B2;
-    --text-subtle:    #6E7280;
-
-    --accent:        #5B8BE3;         /* brightened Moody's blue for dark bg */
-    --accent-light:  #85ADF0;
-    --accent-dim:    rgba(91, 139, 227, 0.18);
-    --accent-fg:     #0D0D0D;
-
-    /* Severity — strictly tri-color (red / yellow / blue). */
-    --sev-crit: #FF3340;
-    --sev-high: #FF3340;              /* same red, lighter bg */
-    --sev-med:  #FFD84D;
-    --sev-low:  #5B8BE3;
-    --sev-crit-bg: rgba(255, 51, 64, 0.18);
-    --sev-high-bg: rgba(255, 51, 64, 0.08);
-    --sev-med-bg:  rgba(255, 216, 77, 0.16);
-    --sev-low-bg:  rgba(91, 139, 227, 0.16);
-
-    --green: #5B8BE3;                 /* alias → brand blue */
-    --amber: #FFD84D;                 /* alias → brand yellow */
-    --red:   #FF3340;
-    --focus: #5B8BE3;
-
-    --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.6);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
-  }
-
   /* Density variants */
   [data-density="comfortable"] { --dens-pad-y: 6px; --dens-pad-x: 12px; --dens-font: 12px; --dens-row-h: 32px; }
   [data-density="cozy"]        { --dens-pad-y: 4px; --dens-pad-x: 10px; --dens-font: 11px; --dens-row-h: 28px; }
@@ -148,15 +109,7 @@
      still referencing them (launch button, active chip, active tab) reads
      as a clean brand fill rather than a 3D gradient.
      ========================================================================= */
-  :root, [data-theme="light"] {
-    --chiaro-light:     var(--accent);
-    --chiaro-mid:       var(--accent);
-    --chiaro-deep:      var(--accent);
-    --chiaro-shadow:    var(--text);
-    --chiaro-edge-hi:   transparent;
-    --chiaro-edge-lo:   transparent;
-  }
-  [data-theme="dark"] {
+  :root {
     --chiaro-light:     var(--accent);
     --chiaro-mid:       var(--accent);
     --chiaro-deep:      var(--accent);
@@ -189,7 +142,7 @@
      ========================================================================= */
 
   /* Tabular numerals everywhere numbers appear */
-  .mono, .srb, .kpi-val, .num, td.num, td.mono, .count {
+  .mono, .srb, .num, td.num, td.mono, .count {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1, "cv08" 1;
   }
@@ -231,8 +184,6 @@
   header { background: var(--surface) !important; color: var(--text) !important; }
   header h1 { color: var(--text) !important; }
   header .stats .val { color: var(--text) !important; }
-  .kpi-row { background: var(--surface-raised) !important; }
-  .kpi-card { background: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; }
   .master-grid .panel-header, .drawer-header, .drawer-summary { background: var(--surface-raised) !important; color: var(--text-muted); }
   .grid-container, table, td, th { background-color: transparent; }
   .grid-container { background: var(--surface) !important; }
@@ -255,14 +206,6 @@
   .drop-inline { background: var(--surface); color: var(--text-muted); }
   .drop-inline:hover, .drop-inline.dragover { background: var(--accent-dim) !important; }
   .tab-bar { background: var(--surface) !important; }
-  [data-theme="dark"] .tab-btn { color: rgba(255,255,255,0.65); }
-  [data-theme="dark"] .tab-btn.active { color: #fff; }
-  /* Row heatmap dark-mode override (light mode lives in the Heatmap rows
-     block further down, source-order wins). */
-  [data-theme="dark"] .left-table tbody tr.heat-1 { background: rgba(255, 51, 64, 0.06); }
-  [data-theme="dark"] .left-table tbody tr.heat-2 { background: rgba(255, 51, 64, 0.10); }
-  [data-theme="dark"] .left-table tbody tr.heat-3 { background: rgba(255, 51, 64, 0.16); }
-  [data-theme="dark"] .left-table tbody tr.heat-4 { background: rgba(255, 51, 64, 0.22); }
 
   /* ---- Header (white masthead + Moody's-blue brand bar) ----
      Layout: H1 on the left, shared imports (dropzones + Analyze + New Files)
@@ -290,9 +233,25 @@
     white-space: nowrap;
     text-transform: none;
   }
-  .stats { display: flex; gap: 18px; font-size: 10px; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
-  .stats .val { color: var(--text); font-weight: 700; font-family: var(--mono); }
+  /* Header stat strip — kept on a single line. The two labels got longer
+     once they became proper "records / assignments processed" counters,
+     so we shrink the type and loosen letter-spacing just enough to avoid
+     wrapping, and pin each stat with white-space:nowrap so the label and
+     its value never split across lines. */
+  .stats {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 14px;
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    align-items: center;
+    line-height: 1.25;
+  }
+  .stats > span { white-space: nowrap; }
+  .stats .val { color: var(--text); font-weight: 700; font-family: var(--mono); margin-left: 4px; }
   /* Shared header imports block — shown only on the Overlap Report tab. The
      visibility is toggled by the tab switcher; all the original IDs are kept
      so the existing wiring in importSetup / loadFiles / launchBtn continues
@@ -359,8 +318,6 @@
   /* ---- Clear filters button ---- */
   .clear-filters-btn { padding: 3px 8px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; color: var(--text-muted); font-size: 10px; cursor: pointer; height: 22px; font-family: inherit; transition: all .15s; }
   .clear-filters-btn:hover { border-color: var(--red); color: var(--red); background: oklch(95% 0.04 25 / 0.5); }
-  [data-theme="dark"] .mf-btn, [data-theme="dark"] .mf-popover .mf-search, [data-theme="dark"] .clear-filters-btn { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border) !important; }
-  [data-theme="dark"] .mf-popover { background: var(--surface); }
   .export-btn, .import-new-btn {
     height: 24px;
     padding: 0 14px;
@@ -444,84 +401,9 @@
   .import-ts .ts-label { color: var(--text-muted); opacity: .7; }
   .import-ts .ts-val { color: var(--accent); font-weight: 600; }
 
-  /* ---- KPI summary cards (Scandinavian frame + COLOR-only brand rail) ----
-     Each card carries a thin colored band on its left as a brand cue. The
-     band is purely a color signal — no shape primitive sits next to the
-     number, because shape-coding on a numeric KPI was found to mislead
-     users (e.g. a triangle next to a count read as "warning"). The Moody's
-     triad still cycles across the row for visual rhythm:
-       SRB $       → red rail    (credit / dollar channel)
-       Rules       → yellow rail (logic channel)
-       MixedIDs    → blue rail   (entity channel)
-       Territories → ink rail    (neutral / structural)  */
-  .kpi-row {
-    display: flex;
-    gap: 8px;
-    padding: 8px 24px;
-    border-bottom: var(--rule-fine) solid var(--border);
-    background: var(--bg);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-  .kpi-card {
-    position: relative;
-    flex: 1;
-    min-width: 110px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 6px 12px 6px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    align-items: flex-start;
-  }
-  /* Colored left rail = the only brand-color signal on a KPI card. Default
-     ink, overridden per modifier. No ::after / no shape glyph. */
-  .kpi-card::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--text);
-  }
-  /* Color-only rail variants. */
-  .kpi-card.kpi-rail-red::before    { background: var(--moody-red); }
-  .kpi-card.kpi-rail-yellow::before { background: var(--moody-yellow); }
-  .kpi-card.kpi-rail-blue::before   { background: var(--moody-blue); }
-  .kpi-card.kpi-rail-ink::before    { background: var(--text); }
-  .kpi-card .kpi-val {
-    font-family: var(--mono);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-  }
-  .kpi-card .kpi-val.red   { color: var(--moody-red); }
-  .kpi-card .kpi-val.green { color: var(--moody-blue); }   /* tri-color: success → blue */
-  .kpi-card .kpi-val.amber { color: var(--moody-yellow); } /* tri-color: warn    → yellow */
-  .kpi-card .kpi-label {
-    font-size: 8px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    line-height: 1.2;
-  }
+  /* ---- Quick-filter chips (formerly shared a row with KPI cards, now
+     hosted inside the main-grid panel-header) ---- */
   .kpi-chips { display: inline-flex; gap: 6px; align-items: center; flex-shrink: 0; }
-  .kpi-actions {
-    margin-left: auto;
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    flex-shrink: 0;
-    padding-left: 12px;
-    border-left: 1px solid var(--border);
-    align-self: center;
-  }
-  /* Compact chip variant when hosted inside a panel-header (keeps the header slim). */
   .panel-header .kpi-chips { margin-left: 8px; }
   .panel-header .chip { height: 18px; padding: 0 10px; font-size: 9px; font-weight: 600; letter-spacing: .04em; }
 
@@ -603,11 +485,27 @@
   /* ---- Overlap % badge ---- */
   .pct-badge { display: inline-block; padding: 0 4px; border-radius: 3px; font-size: 9px; font-family: var(--mono); background: var(--accent-dim); color: var(--accent); margin-left: 4px; }
 
-  /* ---- Expandable sub-rows ---- */
-  .sub-row td { background: var(--surface-raised); padding: 0 !important; border-bottom: 1px solid var(--border); }
+  /* ---- Expandable sub-rows ----
+     The outer <td> is the container that hosts the inner .sub-table. It needs
+     padding: 0 so the inner table can stretch edge-to-edge and align visually
+     with the parent rule row above it. We deliberately use the CHILD combinator
+     (>) so this zeroed padding does NOT cascade into the inner .sub-table's own
+     cells — otherwise its !important would override the per-cell padding rules
+     below and right-aligned money columns would butt up against left-aligned
+     neighbor columns (as seen previously between SRB $ and Job Type). */
+  .sub-row > td { background: var(--surface-raised); padding: 0 !important; border-bottom: 1px solid var(--border); }
   .sub-table { width: 100%; border-collapse: collapse; font-size: 10px; margin: 0; }
   .sub-table th { background: var(--surface-hover); padding: 3px 8px; font-size: 9px; border-bottom: 1px solid var(--border); }
   .sub-table td { padding: 2px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* The Overlapped SRB $ column is right-aligned while Job Type (the next
+     cell) is left-aligned, so their text edges end up visually hugging each
+     other. Add generous right-padding inside the money cell AND left-padding
+     inside the following cell so the two columns read as clearly distinct.
+     Using !important as belt-and-suspenders against future cascade regressions
+     from the .sub-row container rule above. */
+  .sub-table td.srb { padding-right: 16px !important; }
+  .sub-table td.srb + td,
+  .sub-table th.num + th { padding-left: 14px !important; }
   /* Expand / collapse control for MixedID sub-rows in the Overlap Detail
      drawer. Rendered as a clearly-tappable 22x22 chip with a Moody's-blue
      arrow on a pale-blue pad, flipping to solid brand blue on hover so the
@@ -919,12 +817,36 @@
   /* =========================================================================
      NEW: INLINE SPARKBAR
      ========================================================================= */
-  .sparkbar { display: inline-block; height: 8px; width: 60px; background: var(--border); border-radius: 2px; overflow: hidden; vertical-align: middle; margin-right: 6px; position: relative; }
-  .sparkbar > span { display: block; height: 100%; background: var(--accent); border-radius: 2px; transition: width var(--dur-base) var(--ease-out-quint); }
-  .sparkbar.sev-crit > span { background: var(--sev-crit); }
-  .sparkbar.sev-high > span { background: var(--sev-high); }
-  .sparkbar.sev-med  > span { background: var(--sev-med);  }
-  .sparkbar.sev-low  > span { background: var(--sev-low);  }
+  /* Sparkbar — "how much overlap" meter. Track = neutral gray. Fill is
+     always in the Moody's-red family (overlap speaks red in this report,
+     same as the heatmap row tints and the compare bar). Severity is
+     encoded by SATURATION of the same red, so the bar reads as one
+     semantic channel instead of four unrelated hues (the old ramp put
+     blue on low-severity rows, which clashed with the rest of the UI
+     where blue means "interactive / brand"). */
+  .sparkbar {
+    display: inline-block;
+    height: 8px;
+    width: 60px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-right: 6px;
+    position: relative;
+  }
+  .sparkbar > span {
+    display: block;
+    height: 100%;
+    background: rgba(227, 6, 19, 0.55);     /* default / fallback red */
+    border-radius: 2px;
+    transition: width var(--dur-base) var(--ease-out-quint),
+                background var(--dur-fast);
+  }
+  .sparkbar.sev-crit > span { background: rgba(227, 6, 19, 1.00); }   /* full Moody's red */
+  .sparkbar.sev-high > span { background: rgba(227, 6, 19, 0.80); }
+  .sparkbar.sev-med  > span { background: rgba(227, 6, 19, 0.55); }
+  .sparkbar.sev-low  > span { background: rgba(227, 6, 19, 0.30); }   /* pale red, still clearly in-family */
 
   /* =========================================================================
      NEW: VIEW SWITCHER
@@ -969,10 +891,19 @@
   .viz-tooltip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 8px 12px; font-size: 11px; color: var(--text); max-width: 280px; z-index: 200; line-height: 1.5; }
   .viz-tooltip strong { color: var(--accent); display: block; margin-bottom: 2px; }
   .viz-empty { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
-  /* Matrix */
+  /* Matrix — the SVG sizes itself to the live holder in renderMatrix(), so
+     we override the generic viz-container centering rule and let the matrix
+     stretch edge-to-edge. Padding is also tightened relative to the country
+     heatmap since every wasted pixel costs us visible cells. */
+  #viewMatrix .viz-container { padding: 10px 12px 12px; }
+  #viewMatrix .viz-container svg { display: block; width: 100%; height: auto; max-width: none; margin: 0; }
   .matrix-cell { cursor: pointer; stroke: var(--surface); stroke-width: 1; transition: opacity var(--dur-fast); }
   .matrix-cell:hover { opacity: .75; stroke: var(--accent); stroke-width: 2; }
-  .matrix-label { font-size: 9px; fill: var(--text-muted); font-family: var(--mono); }
+  /* No font-size here on purpose: renderMatrix() sets it per text element
+     via inline style so labels scale with cell size. A CSS font-size rule
+     here would win over the SVG font-size presentation attribute and
+     freeze all labels at one size. */
+  .matrix-label { fill: var(--text-muted); font-family: var(--mono); }
   .matrix-legend { display: flex; gap: 8px; align-items: center; font-size: 10px; color: var(--text-muted); margin-left: auto; }
   .matrix-legend .grad { width: 140px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, var(--sev-low), var(--sev-med), var(--sev-high), var(--sev-crit)); }
 
@@ -1079,23 +1010,58 @@
   }
   .country-map-empty small { display: block; margin-top: 8px; color: var(--text-subtle); font-size: 11px; }
   .country-map-empty code { font-family: var(--mono); font-size: 11px; background: var(--surface-raised); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); }
-  /* List of records whose country value doesn't match any known ISO code. Shown
-     below the map when present so the user knows some data is off-map. */
-  .country-unknown {
-    flex-shrink: 0;
-    margin-top: 8px; padding: 8px 12px;
-    border: 1px dashed var(--border);
-    border-radius: 6px;
-    background: var(--surface-raised);
-    font-size: 11px; color: var(--text-muted);
-    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  /* (The "Not on map" chip strip that used to sit here was removed — users
+     found it noisy and the same information is already captured in the
+     map-empty state + console diagnostics when a value fails to resolve.) */
+
+  /* Floating zoom controls. Layered on top of the SVG (z-index: 5) so they
+     sit above country paths; positioned at the top-right of the map pane
+     where they don't cover interesting territory for most datasets (oceans,
+     polar). Size + spacing tuned to match the rest of the report's chip
+     language so they feel native to the Scandinavian/Bauhaus surface. */
+  .country-zoom-controls {
+    position: absolute;
+    top: 10px; right: 10px;
+    display: flex; flex-direction: column;
+    gap: 4px;
+    z-index: 5;
   }
-  .country-unknown strong { color: var(--text); font-weight: 600; margin-right: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .3px; }
-  .country-unknown .cu-chip {
-    font-family: var(--mono); font-size: 10px;
-    padding: 2px 6px; border-radius: 3px;
-    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  .cz-btn {
+    width: 28px; height: 28px;
+    padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px; font-weight: 600; line-height: 1;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,.06));
+    transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), opacity var(--dur-fast);
   }
+  .cz-btn:hover,
+  .cz-btn:focus-visible {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    outline: none;
+  }
+  .cz-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text-muted);
+  }
+  .cz-btn.cz-btn-reset { font-size: 14px; margin-top: 2px; }
+
+  /* Cursor feedback: only show a grab cursor while zoomed in (i.e. panning
+     is possible), flipping to grabbing mid-drag so the gesture is legible. */
+  .country-map svg { cursor: default; }
+  .country-map svg.pannable { cursor: grab; }
+  .country-map svg.panning  { cursor: grabbing; }
+
   .country-attribution {
     flex-shrink: 0;
     margin-top: 6px; font-size: 9px; color: var(--text-subtle);
@@ -1195,7 +1161,7 @@
   .compare-bar button:hover { border-color: var(--accent); color: var(--accent); }
 
   /* =========================================================================
-     NEW: THEME / DENSITY TOGGLES IN HEADER
+     HEADER ACTION BUTTONS  (palette / density / shortcuts)
      ========================================================================= */
   .header-actions { display: flex; gap: 4px; align-items: center; }
   .header-actions button {
@@ -1244,7 +1210,6 @@
      NEW: MOTION POLISH
      ========================================================================= */
   .drawer-wrap { transition: height var(--dur-base) var(--ease-out-quint) !important; }
-  .kpi-val { transition: color var(--dur-base); }
   .left-table tbody tr { transition: background var(--dur-fast); }
   .palette-item, .chip, .insight-card { transition: all var(--dur-fast); }
 
@@ -1260,7 +1225,7 @@
     body { overflow: visible; height: auto; background: #fff; color: #000; }
     .tab-bar, .ov-toolbar, .watchlist-bar, .compare-bar, .country-filter-bar,
     .palette-overlay, .modal-overlay, .drawer-wrap, .header-actions,
-    .view-switcher, .kpi-chips, .kpi-actions { display: none !important; }
+    .view-switcher, .kpi-chips { display: none !important; }
     header { background: #fff !important; color: #000 !important; border-bottom: 2px solid #000; box-shadow: none !important; }
     header h1 { color: #000 !important; text-shadow: none !important; }
     .tab-btn.active::after { display: none !important; }
@@ -1268,8 +1233,6 @@
       background: #000 !important; color: #fff !important; box-shadow: none !important; text-shadow: none !important;
     }
     .header-imports { display: none !important; }
-    .kpi-row { background: #fff; }
-    .kpi-card { border-color: #000; }
     .master-grid { overflow: visible !important; height: auto !important; }
     .grid-container { overflow: visible !important; max-height: none !important; }
     table { font-size: 10px; }
@@ -1315,13 +1278,12 @@
   </div>
   <div class="header-spacer"></div>
   <div class="stats" id="overlapStats" style="display:none;">
-    <span>Rules <span class="val" id="statRules">&mdash;</span></span>
-    <span>Overlapping MixedIDs <span class="val" id="statMixed">&mdash;</span></span>
+    <span title="Total data rows ingested from the Rules Summary file (one row = one rule record, blank lines excluded). Shows 0 when no Rules Summary file is provided.">Rule records processed <span class="val" id="statRules">&mdash;</span></span>
+    <span title="Total data rows ingested from the SRB assignment file (one row = one MixedID assignment, blank lines excluded).">MixedID assignments processed <span class="val" id="statMixed">&mdash;</span></span>
   </div>
   <div class="header-actions">
     <button id="paletteBtn" title="Command palette (Ctrl+K)" aria-label="Open command palette"><span class="ha-icon">&#9881;</span><span>&#8984;K</span></button>
     <button id="densityBtn" title="Change density" aria-label="Change table density"><span class="ha-icon">&#8801;</span></button>
-    <button id="themeBtn" title="Toggle theme (Light / Dark / System)" aria-label="Toggle theme"><span class="ha-icon">&#9788;</span></button>
     <button id="shortcutsBtn" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts"><span class="ha-icon">&#63;</span></button>
   </div>
 </header>
@@ -1443,6 +1405,12 @@
       <button data-view="country" title="Overlap heat map by country (C)" aria-label="Country heat map view" role="tab">&#127758; Heat Map</button>
     </div>
     <div class="ov-actions-right" id="ovActionsRight">
+      <!-- Export buttons relocated here from the old KPI row. They operate on
+           whatever the main grid currently shows, so the toolbar — where
+           search / filters / view switcher already live — is the natural
+           home once the KPI cards were retired. -->
+      <button class="export-btn" id="exportAllBtn" style="display:none;" title="Export the rules currently shown in the main grid (CSV)">Export Overlap</button>
+      <button class="export-btn" id="exportBtn" style="display:none;" title="Export MixedID-level overlaps for the rules currently shown in the main grid (CSV)">Export Details</button>
       <div class="views-menu-wrap" id="viewsMenuWrap">
         <button class="export-btn" id="savedViewsBtn" style="display:none;" aria-haspopup="true" aria-expanded="false">&#9733; Views</button>
         <div class="views-menu" id="viewsMenu" role="menu"></div>
@@ -1463,20 +1431,9 @@
     <button class="cfb-clear" id="cfbClear" title="Clear country filter">&times;</button>
   </div>
 
-  <!-- KPI summary cards + quick filters + row-level actions -->
-  <div class="kpi-row" id="kpiRow" style="display:none;">
-          <!-- Color-only Bauhaus channel: red / yellow / blue / ink rails.
-               No shape glyphs — the rail color is the brand cue, the number
-               is the focus. -->
-          <div class="kpi-card kpi-rail-red"><div class="kpi-val red" id="kpiSrb">&mdash;</div><div class="kpi-label">Overlapped SRB $</div></div>
-          <div class="kpi-card kpi-rail-yellow"><div class="kpi-val amber" id="kpiRules">&mdash;</div><div class="kpi-label">Overlapped Rules</div></div>
-          <div class="kpi-card kpi-rail-blue"><div class="kpi-val" id="kpiMixed">&mdash;</div><div class="kpi-label">Overlapped MixedIDs</div></div>
-          <div class="kpi-card kpi-rail-ink"><div class="kpi-val" id="kpiTerr">&mdash;</div><div class="kpi-label">Overlapped Territories</div></div>
-    <div class="kpi-actions" id="kpiActions">
-      <button class="export-btn" id="exportAllBtn" style="display:none;" title="Export the rules currently shown in the main grid (CSV)">Export Overlap</button>
-      <button class="export-btn" id="exportBtn" style="display:none;" title="Export MixedID-level overlaps for the rules currently shown in the main grid (CSV)">Export Details</button>
-    </div>
-  </div>
+  <!-- (KPI summary cards removed — portfolio totals were judged more noise
+       than signal at the top of the report. Quick-filter chips moved into
+       the grid's panel-header; Export buttons moved into the toolbar.) -->
 
   <!-- View pane: GRID (default) -->
   <div class="view-pane active" id="viewGrid">
@@ -1517,7 +1474,7 @@
   <!-- View pane: MATRIX -->
   <div class="view-pane" id="viewMatrix">
     <div class="viz-container">
-      <div class="viz-title">Bilateral rule × rule heatmap <span style="color:var(--text-subtle);font-weight:400;text-transform:none;letter-spacing:0;">&mdash; shows top 40 rules. Cell intensity = shared MixedIDs.</span>
+      <div class="viz-title">Bilateral rule × rule heatmap <span id="matrixSub" style="color:var(--text-subtle);font-weight:400;text-transform:none;letter-spacing:0;">&mdash; ranked by severity. Cell intensity = shared MixedIDs.</span>
         <div class="matrix-legend" style="display:inline-flex;"><span>Low</span><div class="grad"></div><span>High</span></div>
       </div>
       <div id="matrixSvgHolder" style="flex:1;position:relative;min-height:0;overflow:auto;"></div>
@@ -1539,9 +1496,16 @@
         <div class="matrix-legend country-legend"><span>Low</span><div class="grad"></div><span>High</span></div>
       </div>
       <div id="countryMap" class="country-map" role="region" aria-label="World overlap heat map">
+        <!-- Floating zoom controls overlaid on the map's top-right. The SVG
+             itself also handles mouse-wheel zoom and click-drag pan; these
+             buttons are there for touch and discoverability. -->
+        <div class="country-zoom-controls" role="group" aria-label="Map zoom">
+          <button type="button" class="cz-btn" id="cZoomIn" title="Zoom in (or scroll up on the map)" aria-label="Zoom in">+</button>
+          <button type="button" class="cz-btn" id="cZoomOut" title="Zoom out (or scroll down on the map)" aria-label="Zoom out">&minus;</button>
+          <button type="button" class="cz-btn cz-btn-reset" id="cZoomReset" title="Reset zoom" aria-label="Reset zoom">&#8634;</button>
+        </div>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="30.767 241.591 784.077 458.627" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Overlap heat map by country"><g class="world-countries"><path id="_somaliland" d="M512.674 502.797l3.526 2.403 1.046-.052 8.757-3.008.994 3.206-.7 2.706-1.894 1.503-4.73-.302-6.768-4.158-.23-2.298z"/><path id="ae" d="M528.466 468.135l.753 3.008 8.52.752.597-6.172 1.644-.897.45-2.257-2.69.752-2.99 4.52-6.284.293z"/><path id="af" d="M545.85 435.383l1.374 10.77 3.423.753.32 1.937-2.455 2.05 4.573 3.69 8.885-3.198.71-3.786 5.592-3.492 2.145-8.09 1.6-1.723-1.66-2.887 5.412-3.347-.692-.967-2.498.155-.226 2.3-3.354-.034-.062-3.068-1.08-1.288-1.814 1.65.052 1.514-2.74 1.036-5.058-.32-6.568 6.882-5.88-.537z"/><path id="al" d="M450.68 420.438v3.984l1.14 2.152.82-.096 1.41-2.566-.82-1.15-.32-2.844-1.09-1.012-1.14 1.532z"/><path id="am" d="M507.47 420.55l4.15 5.41-1.22 1.427-2.938-.51-3.646-3.268.196-2.147 3.458-.914z"/><g id="ao"><path class="mainland" d="M437.366 547.46l2.948 11.004-.07 3.478-4.312 4.633-.647 7.527 16.597.147 5.395 1.953 4.45-.58-2.594-3.25.01-9.283 5.1-.217v-3.62l-4.14-.173-.83-8.575-1.746.024-.943-.85-1.027.055-1.365 2.646h-5.255l-1.22-1.226.363-1.738-1.436-2.1-9.278.145z"/><path d="M435.577 544.453l1.504 1.953 1.946-1.842-.57-1.91-.484-.034-2.395 1.833z"/></g><g id="ar"><path class="mainland" d="M279.05 600.613l1.677 1.57-6.37 9.468-2.24 2.48.777 10.813 4.918 5.974-4.132 7.21-3.13 1.35h-3.578l1.003 5.626-5.593 1.92 1.34 4.73-3.354 10.7 4.14 3.38-2.238 5.515-3.804 5.975 2.014 4.165-4.918.786-4.028-4.95-.674-15.433-6.258-26.208 1.893-9.163-4.028-11.714 2.68-15.204 2.463-2.93-.605-2.223 3.164-2.89 7.053.484 3.942 4.21 4.555.078 4.668 2.853-1.375 3.217.33 3.25 6.61-.312 3.097-4.727z"/><path d="M264.745 687.564l.225 4.95 3.803-.336 3.242-2.144-5.48-1.124-1.79-1.346z"/></g><path id="at" d="M430.46 403.46l-.562 1.166.483.83 2.016-.415h1.71l1.858 1.573 3.95-.717 2.904-1.73.743-1.166-.11-1.504-2.612-1.954-3.5.035-.295 1.988-3.683 1.797-2.9.097z"/><g id="au"><path class="mainland" d="M672.96 609.067l-.302 21.938-3.37 2.472-.304 2.16 4.598 3.087 11.35-2.16h5.826l2.145-3.096 12.88-2.472 9.197 2.784-.614 3.708 1.228 3.708 7.055-1.236.302 1.85-4.6 3.397 1.53 1.236 3.37-1.236-.916 10.2 6.44 4.944 3.683-1.235 1.84 1.852 10.735-1.548 10.123-16.382 3.682-.925 7.357-13.596 1.84-11.74-4.598-5.868 1.84-1.237-3.683-11.436-3.984-2.783.614-15.448-3.684-2.782-.916-8.652h-1.842l-6.138 20.392-3.37.312-7.668-7.728 4.296-11.437-7.97-1.546-8.897 2.472-2.455 7.104-3.984.925-.303-4.944-16.252 9.89.304 3.708-2.455 3.397h-6.14l-13.19 5.56-4.604 12.392z"/><path d="M728.775 668.09l-1.53 6.18.303 4.322 4.6-.312 5.212-8.03-8.585-2.16z"/></g><path id="az" d="M508.93 418.674l-.872 1.486 4.07 5.342 1.42-.458 2.333 2.446 1.012-4.287 2.533.406-.104-1.23-4.164-3.646-.795 2.143-5.43-2.203z"/><path id="ba" d="M442.708 411.084l-.32.527 5.802 5.982 2.127-3.13-.078-1.234-1.858-2.256-5.674.112z"/><path id="bd" d="M616.256 457.908l-1.134 2.05 2.938 5.583.087 4.358.535 1.166 3.45.06 1.952-1.874 1.418.855.285 2.652 1.133-.708.07-3.39-.952-.112-.596-2.88-2.403-.085-.597-1.6 1.47-1.962.023-.97h-4.27l-3.41-3.142z"/><path id="be" d="M414.02 391.704l-.555 1.383 5.947 3.925.4.05.375-1.093.837-.59-1.336-1.498h-.916l-1.255-1.426-3.498-.752z"/><path id="bf" d="M404.493 493.496l3.146-.25 5.16 7.295-4.79 3.614-3.466-.892-4.66.062-.752 2.73-3.907.19-1.07-1.46 1.384-4.443 8.953-6.844z"/><path id="bg" d="M457.092 414.066l.14 4.305 1.45 3.026 5.455.095 2.455-1.736 2.412-.96-.588-2.75.545-1.468-1.227-.64-1.687.138-1.323 1.332-5.55.043-2.08-1.384z"/><path id="bi" d="M478.504 538.385l3.69-.078-.958 3.232-.935.81h-1.14l-.813-2.186.157-1.78z"/><path id="bj" d="M411.512 515.288h1.833l.104-5.204 2.314-3.363-.104-5.85-2.102-.053-3.604 2.816 1.504 2.87.054 8.785z"/><path id="bn" d="M689.038 515.08l-2.49 3.018 2.04.64 1.15-1.607-.7-2.05z"/><path id="bo" d="M238.63 561.36l7.115-3.103 2.35.226 1.566 6.534 10.84 3.604 1.79 5.524 4.47.562 1.9 4.73-1.34 4.277-7.27.562-2.68 6.872-5.704-.112-1.79-.337-3.293 3.197-1.625-.156-5.593-12.958 1.547-2.316.545-9.163-1.383-5.455-1.443-2.487z"/><path id="br" d="M286.63 618.464l5.403-10.39.198-8.73 10.08-6.502h5.645l4.435-7.512.804-14.418-1.815-3.855 10.683-9.75.406-10.762-14.515-7.105-17.53-5.48-8.264-.812 2.222-4.67-.604-7.103-1.808-.596-2.67 5.307-1.4 1.754-3.596-1.59-12.093 4.262-4.027-5.073.648-5.3-3.803 3.872-4.2-2.265-.425.597.01 1.84 3.62 1.946-5.436 5.73-3.432-.034-3.475-3.535-3.934.122-.484 4.2 2.256 2.74-2.663 8.53-3.112.242-4.953 3.13-1.21 6.146 4.296 4.6.787-.89 3.017-.813 2.576 4.34 7.374-3.164 2.86.165 1.972 6.976 10.52 3.337 1.815 5.565 4.478.537 2.135 5.314-1.443 4.73 1.884 2.473-.275 3.682 5.048-.477 4.625 5.844-.363 4.104 2.74 2.316-6.57 9.95 11.566 6.474z"/><g id="bs"><path d="M222.12 463.112l-1.088-.337-.086 2.1 1.34 1.35.917-1.35-1.082-1.763zM224.29 466.397l-1.504.838 1.417 2.02.752-1.01-.665-1.848zM229.14 467.91l-1.59-.087.164 1.012 1.167 1.687 1.003-1.1-.743-1.512zM228.388 465.896l-2.593-1.1-.5-2.608 1-.425 1.004 2.023 1 .76.088 1.35zM225.88 460.588l-1.34-.337-.25-1.685-1.417-.5.917-.927 1.668.588 1.253.762-.83 2.1z"/></g><path id="bt" d="M616.108 453.56l1.34 1.834 4.528.034-.458-2.507-5.41.64z"/><path id="bw" d="M454.56 594.59l1.858.57-.26 5.313 1.91.26 4.392-3.96 5.273.57 1.4-3.544 6.672-6.096-8.013-9.223-.104-1.513-.883-.26-2.43 2.24-6.31.154-.884 7.867-2.478.57-.142 7.052z"/><path id="by" d="M456.418 382.86l1.297 2.136-.52 1.703.087 1.348.476 1.616 2.68-1.52 3.33.085 2.333.958h5.923l1.73-4.14 1.036-1.565v-1.045l-3.718-5.23-3.285-1.305-2.68-.303-2.335.743.088 2.35-3.24 4.1-3.202.068z"/><path id="bz" d="M191.823 483.228l-.043 3.154h.726l2.472-4.615H193.3l-1.477 1.46z"/><g id="ca"><path class="mainland" d="M151.767 281.182l1.72 2.602.864 3.475 4.306 1.08 3.017-3.25 2.585 1.306 7.32.647 5.17-2.17.864 7.157h3.017v-3.034l3.016.216 7.538 8.895 4.953 3.035-2.584 4.123 1.08 1.08 9.674 1.954.216 4.34 2.585.432.648-6.51 4.09-1.08 3.016 4.556 6.457 3.034 3.232.647 2.152-2.603.216-4.124 3.873-2.387 1.288 3.476-3.448 6.077.432 3.032L231 314.16l3.874-3.476.216-4.556-2.152-3.476.648-2.817 5.17-2.603 2.368 1.738.432 15.188 3.657-3.25 2.152 1.305-3.017 5.204 3.873.865 5.603-8.68 4.737 4.987-1.936 8.894-4.737 2.603-4.52-2.17-8.178 1.737.863 2.818-2.152 3.476-6.672 1.52-7.538 5.86-6.673 8.897-.864 2.817 4.52 1.737 1.72 4.338 6.242 6.293 9.906 4.34-2.15 9.975-.217 2.818 2.585 1.736 3.45-4.556.43-8.68 5.386-.215 2.584-4.99.433-7.588 6.89-13.45 8.61 3.034 4.52 6.293-1.937 6.29 3.45 1.955 8.393-5.646 2.368 15.403 7.754 9.327.216 4.77-8.61 2.17-4.087 4.34-8.61-1.954-4.304-.217-7.538 5.86 4.52-1.082 5.602-1.08 1.08 1.305-1.503 4.77.216 4.34 2.585 1.737 2.584-.648 1.295-1.953h1.72l-2.8 5.204-5.386.215-2.37 3.475h-3.016l-.864-2.603 4.305-4.338-5.17 1.737-.232-7.373-1.487-.863-4.52 1.953-.433 3.69h-10.338l-8.832 6.08-11.842 3.91-1.287-1.74 5.964-8.9-3.388-3.262-2.153-4.132-4.383-3.346-4.702-.39-8.428-5.903-61.122-10.043-1.01-4.14-5.603-5.205v-4.34l.864-3.906-.433-2.17-2.15-2.17-.433-3.475 5.602-3.908-3.45-18.653-4.737-.217-4.305-5.645 23.65-40.18z"/><path d="M130.684 350.117l-1.47 2.818.51 1.996.96.6-.226.81-1.03.295.295 2.965 1.106 1.115.88-.96-1.105-2.886.657-2.3 1.616-2.152-1.175-1.997-1.02-.303zM135.542 367.008l-1.323.52 2.428 2.818.588 3.336 2.43 2.592 2.057-.37v-3.407l-2.498-1.557-3.683-3.932zM268.15 295.833l-1.53 1.547 1.34 2.126 6.328.77-4.028-4.252-2.11-.19zM191.105 270.143l.19 3.475-6.898 7.148 1.73 5.79 4.978-1.347 2.878-4.254 7.278-2.706 5.94-.39-4.6-5.02-2.3 1.736-1.728-.58-.96-2.125-2.108-2.125-4.4.398zM200.113 259.908l-1.53 2.706 7.477 2.706 2.68-4.055 1.15 2.707h1.92l3.638-4.055-4.41-1.158-1.728-1.35-2.3 2.317-6.897.18zM213.148 265.318l-5.938 2.508v1.928l7.667 2.896-1.73 1.928 1.15 2.507 4.79-2.126h4.028l1.92 3.085 3.258-3.285-.77-3.095-2.68.968-.38-3.863 1.34-2.316h-1.34l-2.11 1.35-.958.768.58 2.707-1.53 1.157-2.3-.19-.58-3.476-4.417-3.452zM221.005 259.33l-.58 1.926 3.64 1.738 2.68-1.547-.19-1.158-5.55-.96zM223.875 256.044l-2.68.968.19 1.35 5.94-.39-.19-1.348-3.26-.58zM236.72 259.33l-.38 1.347-.96 1.35v1.928l3.64-.58 3.83 3.286h1.34v-3.284l-3.83-4.253-3.64.206zM246.497 263.19l1.53 1.74-1.34 2.315.96 2.507 4.217-2.317V265.7l-2.49-2.897-2.877.388zM252.055 258.75l.19 3.086h5.178l1.34 1.158-.19 1.348-4.6.58 3.26 4.443 4.41.77 6.127-2.705-8.817-13.33-2.68 1.738.19 2.316-3.07-1.158-1.338 1.754zM207.4 280.576l-7.28 1.928-4.218 3.673.38 4.054 7.667 2.318-1.73 3.864-5.558-3.477-1.53 2.896 3.64 2.508-.19 4.054 5.557 1.547 6.707-.39 1.15-2.126 4.978 5.6 3.45-1.156.578-3.864 2.49 1.737.38-3.863-3.068-1.928.19-12.163-2.68-2.126-2.87 3.865-8.046-6.95zM230.782 289.073l-2.49-1.158-1.34 1.737 2.68 4.253.19 4.054 5.75-3.476v-5.022l2.11-2.126-2.11-1.547h-3.45l-1.34 3.283zM243.048 287.335l-4.028 3.285.96 4.054h2.49l1.148-2.126 1.73 1.737 1.728-.19 4.6-3.864-8.628-2.895zM242.66 280.956l-.96 1.928 4.218 1.548 1.15-1.738-4.41-1.738zM240.17 273.617l-4.22.58-2.49 2.314 4.6.19-1.34 3.476.96 1.548 1.34-.19 3.258-5.212-2.11-2.705zM247.456 272.27l-2.3.77.38 3.086 3.83 2.507.19 1.927-1.148 1.16.58 3.863 14.754 4.823 4.028 1.35 4.028-3.476-4.79-3.864-4.408 1.158-6.128-.58-2.3-2.315-.578-6.372-3.83-1.928-2.308-2.11zM259.523 292.357l-4.218-.39-4.98 1.927-2.68 3.666.77 10.043 8.238.39 7.857 3.864 5.56 6.37 4.217-.19-1.15 5.982-3.83 6.37-4.217 1.926-3.07-.578-1.53-1.348-2.298 3.086.96 3.086 3.258.19 4.028-1.93 3.45 8.887 8.625 5.602 5.938-7.53-4.978-8.107 2.878-3.284 4.028 6.76 7.278-6.372-1.34-2.896-4.98 1.548-3.447-9.466 3.258-5.403-6.518-6.948-3.64 2.507-3.448-7.53-7.277.968-1.92-9.076-5.937 4.055-.58 5.02h-3.258l.38-4.442 4.573-6.758zM262.02 274.006v1.738l-4.217.968 1.15 1.927 4.788 1.927 5.37.58 3.83 2.705 3.83-2.127-2.682-2.705h3.45l2.108-2.316 5.178-.77v-1.158l-2.878-1.928.38-2.127 8.047 1.35 11.886-4.634-4.41-1.348 1.15-1.547h9.196l1.53-1.546-18.592-6.57-4.41-1.546-4.79 3.476-5.367-4.443-2.878-.19-.58 3.676-3.638-3.285-4.218 1.35.77 2.126 6.327 1.35-.38 3.086 3.45 2.125 8.438-2.125.19 2.896-6.898 3.285-4.218-3.285-3.83.39 3.83 5.41-1.92.97-2.877-2.51-2.11 1.35 1.92 3.665h3.26l-.77 3.475-2.68-.39-3.45-3.673-2.284.4zM244.94 327.16l-3.656 4.598-.225 5.065 3.197-1.84h3.88l2.74 2.532 2.516-2.076-8.452-8.28zM289.466 386.977l-9.136 8.748.916 2.074 11.186 4.14 1.6-2.758-.917-4.6-3.657.46-2.057-2.3 3.424-3.45-1.358-2.315z"/></g><path id="cd" d="M438.023 546.597l8.912-.155 1.808 2.567-.07 1.892.666.605h4.425l1.27-2.5h1.81l.733.743 2.48-.07.734 8.715 4.287.14v.674l11.52 5.194.536 1.012h2.41l-.267-3.648-4.357-2.092.27-2.766 1.875-4.392 4.287-.14-3.683-12.223.068-5.195 5.826-9.11.068-1.278-.874-.477.035-2.472-1.062-.095-1.072-1.366-17.59-.795-3.225 3.138-5.28-3.475-1.858 1.14-1.348 11.35-3.338 2.576-1.003 2.283.178 3.38-6.017 4.918-1.6-.726.217.94-1.774 1.705z"/><path id="cf" d="M443.452 519.23l4.028 4.355 1.59-2.057 2.532.104.544-2.006 2.49-1.556 5.17 3.562 2.98-2.956 11.575.51-10.735-11.082 1.443-.897.198-1.954-2.438-1.15h-3.58l-5.766 5.716-.197 2.35-4.573-.146-.146 1.003-2.982-.305-2.688 5.108.556 1.4z"/><path id="cg" d="M439.424 526.55l-.052 1.256 4.13.104.147 10.728-3.778-.104-2.187-1.703-1.693.952-.078.476.873.423.25 2.205-2.333 2.006.5 1.058 2.586-2.006h1.244l.396 1.2 1.644.7 5.27-4.46-.103-3.26 1.1-2.652 3.38-2.507.907-8.48-2.402.01-2.783 3.812-7.018.246z"/><path id="ch" d="M423.787 402.82l-3.77 4.01.077.406 1.547-.483 1.394 1.937 2.352-.83 1.625 1.263.668-.38 2.005-3.146-.51-.484-1.98-.05-.96-1.964-2.446-.28z"/><path id="ci" d="M388.484 521.562l3.697-2.617 4.6-.806 4.694 1.012-2.395-3.622-.702-2.213.7-6.544-4.19.198-1.9-1.813-3.995.104-1.9.305.197 4.425-1.002.406-1.203 2.215 3.095 3.62.304 5.332z"/><g id="cl"><path d="M261.39 683.51l-3.69 8.11 6.37.673.113-5.403-2.792-3.38zM260.137 682.24l-2.775 3.067-.337 3.604-5.368-3.042-5.705-8.22-1.677-2.933 2.35-3.043-.224-3.83-2.68-1.124-2.125-1.572.45-2.144 2.79-.787.563-12.387-4.356-2.48-2.844-64.477.735-1.277 5.567 12.836 1.78.034.58 2.05-2.37 2.867-2.722 15.45 3.873 11.894-1.79 9.007 6.31 26.486.667 15.49 4.52 5.23 4.79-.697zM241.717 649.833l-1.115 1.686.562 2.93 1.115.113.56-3.718-1.123-1.012z"/></g><path id="cm" d="M428.03 519.428l2.784 2.56-.2 3.96 15.267-.354 1.246-1.4-4.375-4.71-.647-1.703 2.784-5.21-1.893-3.46-1.59-.854V506.5l1.84-1.2.104-5.464-1.46-.164-.024 2.87-6.414 11.972-3.925.2-2.688 1.85-.806 2.864z"/><g id="cn"><path class="mainland" d="M594.498 386.128l-2.99 7.52-4.124-.216-4.35 9.518 3.692 4.7-7.606 10.505-3.907-.658-2.61 3.285.647 1.97 3.043.218 1.52 3.5 3.045.658 9.344 12.04v6.13l4.563 2.843 4.996-.872 6.304 3.72 7.605 2.186 3.69-.44 4.132-.44 8.687-5.688 2.827.44 1.08 2.567 2.396.718 3.26 4.814-2.17 4.814 1.306 3.285 3.69 1.312.646 3.942 4.35.44.647-1.972 6.302-3.285 3.907.217 4.563 5.03 3.043-1.312 1.954.216.873 2.413 1.52.216 2.17-3.06 8.688-3.286 7.823-9.413 2.61-8.973-.217-5.912-3.26-.656 1.953-2.19-.434-3.5-8.256-8.314V421l2.386-3.063 2.388-1.098.216-2.413h-6.085l-1.09 3.285-2.828-.656-3.475-3.718 2.17-5.688 3.043-3.285 2.827.217-.434 5.03 1.52 1.314 3.692-3.717 1.306-.217-.432-2.844 3.476-4.16 2.61.217 1.52-4.813 1.782-.942.182-3-1.73-1.815-.146-4.736 3.33-.216-.217-12.214-2.334 1.4-.863 3.13-3.897-.01-11.298-6.353-8.16-9.837-8.28-.086-2.108 1.833 2.68 6.137-.935 5.758-3.336 1.383-1.876-.147-.14 5.696 1.955.44 3.476-1.53 4.562 2.188v2.188l-3.26.216-2.61 5.688-2.387.215-8.472 11.16-8.902 3.94-6.085.44-4.124-2.843-5.868 3.068-6.302-1.97-1.52-4.16-10.643-.656-5.646-9.19h-2.385l-1.92-4.26-2.287-.182z"/><path d="M671.802 472.655l-2.064.58-1.487 1.832 1.237 2.41 1.814.164 2.067-1.83.492-2.412-2.058-.743z"/></g><path id="co" d="M234.326 498.25l-1.78-.18-11.774 9.706-1.245 3.414-1.608.182.716 7.546-4.105 10.07 4.46 3.776 5.715.363 3.924 5.757 5.704.183-.182 4.312h2.135l2.316-7.91-2.144-2.694.535-5.03 4.46-.364-.536-11.688-9.994-3.232-2.316-6.293 5.716-7.92z"/><path id="cr" d="M202.905 502.745l1.202 2.352.977 1.297-1.314 3.898-2.507-1.764-4.097-3.752v-2.48l5.74.45z"/><path id="cu" d="M205.904 469.846v1.1l4.6.086 2.168-1.263.337.925 4.51 1.098 4.012 3.622-.917 1.262.165 1.436 3.345.84 3.345-1.515 1.504-1.513-2.17-1.098-11.193-6.57-3.923-.423-5.783 2.012z"/><g id="cv"><path d="M350.01 490.264l-1.642.942 1.175.94 1.41-.707-.943-1.176zM354.046 492.165l-1.07.95.76 1.41 1.833-.82-1.524-1.54zM351.704 494.836l-1.375.82 1.478 1.98 1.168-.612-1.272-2.188z"/></g><path id="cy" d="M484.555 437.794l1.062.77-3.294 3.12-1.573-.052-1.167-.82.156-1.53 2.385-.155 2.43-1.333z"/><path id="cz" d="M437.202 398.92h3.829l2.05 1.462 3.794-3.155-3.683-2.627-3.648-1.765-2.498.45-3.39 2.178 3.545 3.458z"/><path id="de" d="M422.257 384.234l3.086-.5v-2.178l2.584-.425 1.418 1.428 1.495.164 2.334-1.012 2.083.588 1.832 1.592.25 5.955 1.832 2.438-2.41.337-4.004 2.515.338.84 3.58 3.353-.252 1.677-3.328 1.677-3.085.086-.752 1.59h-1.58l-.753-1.676-2.75-.675-.087-2.767-1.39-.77.114-1.86-.406-1.33-1.982-1.823.414-2.854 2.16-1.01-.74-5.36z"/><g id="dk"><path d="M427.123 370.076l-3.586 3.968-.13 2.584 1.635 4.263 2.56-.483-.32-3.483 1.764-1.97-.034-1.55-1.245-3.222-.644-.106zM428.98 377.354l-1.063.23v1.582l1.128.875.997-.25-.243-1.502-.82-.934zM432.306 375.848l-.95.23-1.055.968.45 1.954 1.29.507-1.333.535-.255.685h2.005l.602-1.1-.77-.377.25-.962.917-1.205-.25-1.042-.9-.192z"/></g><path id="dj" d="M508.99 499.77l-.492 2.904 3.424-.052.052-4.27-1.253-.77-1.73 2.19z"/><path id="dm" d="M256.23 485.37l-.76 1.617.916 1.228 1.14-.994-1.296-1.85z"/><path id="do" d="M242.434 481.533l-4.573-2.99-2.886-1.022-.578 5.522.578-.047.76 1.46.995-1.15 2.895-.77 2.516.537.294-1.54z"/><path id="dz" d="M424.625 435.764l-3.526-1.186-14.678 2.758-3.198 2.43 1.953 10.087-5.835.233-3.51 5.646-8.358 2.005.025 4.105 27.53 21.048 4.693.398 15.654-12.23-1.565-1.972-2.938-.398-1.764-2.955V453.5l-1.177-1.184.2-3.155-3.13-3.154-.39-3.354 1.366-.986-.59-3.553-.765-2.35z"/><g id="ec"><path class="mainland" d="M213.986 529.43l-4.088 2.54-.294 3.772-.82 1.234 2.575 2.473-1.116 1.218.26 3.113 4.606 1.1 6.976-8.257-.017-2.878-3.346-.216-4.738-4.1z"/><path d="M183.533 531.443l-.536 2.378-.994 1.003.683 1.228 1.754-.69.838-1.46-.536-1.537-1.21-.92z"/></g><g id="ee"><path class="mainland" d="M462.562 363.3l-4.84-.174-3.068 1.875-.043 1.393 1.988 1.875 6.182 1.047-.218-6.016z"/><path d="M452.236 364.042l-1.308.44 1.308.226.595.69.712-.852-.71-1.215-.596.712zM452.792 365.792l-1.862.833-.643 1.11.643.723 2.362-.875 1.137-.752-1.638-1.038z"/></g><path id="eg" d="M466.16 449.222l2.308.062 4.495 1.244 2.135.06 2.646-2.212h1.234l2.25 1.245h2.844l.51-.034 1.798 5.17.51 1.668.477 2.498-.85.622-1.46-.734-1.687-5.498-1.52-.11-.112 1.866 1.012 3.232 8.1 10.027.173 4.305-2.36 2.723-22.162-.25-.34-25.883z"/><path id="er" d="M496.224 493.86l-.216-5.094 3.423-3.992.927.71 1.686 5.636 8.09 6.023-1.47 1.808-5.92-5.09h-6.52z"/><g id="es"><path class="mainland" d="M402.565 416.322H391.55l-2.22-1.004-1.072.078-1.297 2.696.46 2.775 4.21.39.535 1.77-1.833 10.33.078 1.85 2.98 1.618 3.44.232 6.88-1.694 3.364-4.233.077-4.313 5.966-5.395.302-2.386-5.428-.078-5.425-2.636z"/><path d="M374.265 458.444l-1.513.873.7.71.813-1.583zM369.01 458.608l-1.876.476.935 1.418h1.406l-.467-1.894zM364.55 457.19l-1.177 1.185 1.643 1.418.935-2.126-1.4-.476zM413.578 426.877l-1.375.467.304 1.235h1.988l.84-.926-1.757-.777z"/></g><path id="et" d="M489.982 508.606l6.292-14.005 6.25.036 5.54 4.814-.39 3.968h4.297l.44 2.386 6.95 4.157 4.287.218-8.15 8.756-11.194 3.45h-2.773l-4.944-4.22-1.953-.82-3.786-5.576-2.5.035-.293-2.56 1.928-.637z"/><path id="fi" d="M453.072 340.202l1.79.786 1.104 2.074-1.104 1.436-5.55 6.068-.952 3.2 1.27 4.632 4.28 3.2 5.705-2.716 4.598-.64 4.28-6.872-3.174-7.512-3.02-7.192.478-4.633-1.9-.32-.493-3.38-2.56-4.175-2.835 1.962-1.114 4.556-3.008-1.807-4.185-1.022-.934 1.09 1.606 1.453 2.93-.052 2.36 3.812.426 6.052z"/><g id="fk"><path d="M281.194 678.393l-2.273-.25-2.264 1.52 1.642 1.782 2.896-3.052zM283.46 677.252l-.753 2.41-2.144 1.902.13.63 3.655-1.4 1.513-1.9-2.4-1.642z"/></g><g id="fr"><path class="mainland" d="M412.973 393.588l-1.91.467-3.82 4.158-1.15.078-1.53-1.08-.992.233-.76 2.386-5.585.154.156 1.236 3.82 2.543 4.436 3.543-.077 4.236-2.37 4.157 5.127 2.463 5.204.154 1.607-1.85 3.286.078.916.848 3.284-.233 1.686-2.162-2.145-2.54-.155-1.617.458-1.77-1.07-1.54-1.834.536-.232-1.383 4.054-4.47v-2.696l-2.348-.767-1.432-.987-6.623-4.175z"/><path d="M276.163 517.285l5.058 3.154-2.645 5.254-.96 1.21-2.808-1.615.08-5.664 1.276-2.34zM540.023 586.93l-1.972.13-.128 1.72 1.313.27 1.972-.925-1.184-1.195zM516.857 562.666l.656 1.46h1.055l.526-1.856-2.237.396zM258.823 489.822l-.917.847.683 1.382 1.295-.38-1.062-1.85zM428.04 418.016l-1.688 1.695-.154 1.54 1.374.846.536-.076.303-2.24-.37-1.764zM254.095 484.065l-1.296.535.457 1.15 1.52-.995-.302-.31-.38-.38z"/></g><path id="ga" d="M435.438 526.646l-.104 2.15-4.875-.103-2.983 5.766 7.012 7.666 1.735-1.453-.052-1.503-1.192-.554v-1.057l2.69-1.702 2.386 1.807 2.638.052-.054-9.067-4.176-.196-.052-1.903-2.974.096z"/><g id="gb"><path class="mainland" d="M400.63 367.984l-1.583 2.395.63.958h3.65v1.6l-.953 1.278.632 3.354 2.058 3.994 1.58 3.672 2.534.96 1.105 1.92-.155 1.754-1.582.96-.156.794 1.106.64-.95 1.28-2.222.958-4.28-.477-6.663 3.035-2.22-1.115 6.345-3.674-.796-.476-3.33-.32 2.06-3.033.318-2.56 2.696-.318-.475-4.953-3.175-.156-.95-1.115.155-3.675-1.9.156 1.9-6.387 3.492-2.56 1.127 1.11z"/><path d="M393.974 378.693l-2.853.32-.155 2.56 1.9 1.278 2.06-.474.795-1.436-1.746-2.247z"/></g><path id="ge" d="M495.144 415.596l2.827 3.69 3.528 1.626 2.17-.01 3.725-1.01.935-1.46-11.02-4.124-2.164 1.288z"/><path id="gh" d="M399.09 513.18l.97 2.272 2.523 3.96 1.4-.053 3.82-2.172-.27-12.354-2.956-.864-4.14.112-1.346 9.097z"/><g id="gl"><path class="mainland" d="M292.587 282.398l-1.176 1.877 2.12 2.117-.943 2.118 3.06 3.994 3.76-1.176 4.937-.466 5.644 6.11 3.76 10.105-3.05 6.345 4.227-.708 2.354 1.41.23 3.06-5.167.232 2.818 2.817 3.527.71-7.754 10.338-.942 6.346 1.644 5.17-1.176 3.06 2.118 6.577 3.993 4.47 1.175-.233 2.584-.71.232 3.76 1.642 2.353 3.052-.234 2.353-8.696 7.052-8.697 10.58-4.227 6.58-8.23 3.05 1.41h6.344l5.17-5.17 6.346-2.583.708-3.994-3.993-3.527-3.526-1.175-1.884-4.936 4.47-2.584 7.053 3.76 2.352-2.584-3.76-2.117 7.995-10.814-1.41-4.702-3.76-.232 1.408-4.228 4.703-2.118 9.637-8.46-2.816-3.054-10.815.94-5.645 5.647 3.295-7.288-3.762-.942-2.117 3.76-3.05-2.584-8.465.94 2.354-3.76 13.865-.466-3.528-4.702-15.04-2.817-6.11.942.233 3.06-6.345-2.117.232-2.118-4.47.94-.942 2.354 4.703 1.643-4.936 3.527-3.527-3.994-4.936-1.408-.71 3.76h-4.936l-1.885-3.994-7.754-1.176-4.23 2.117-.232 2.818-5.402-.71-3.294 1.41.234 3.293v1.644l-6.11 1.176-2.82-1.877-1.884 3.05 2.82 3.06 5.877-.708.466 1.885-4.47 2.118-3.99-1.907z"/><path d="M311.396 319.066l1.41 2.12-.71 2.583h-1.408l-1.885-2.12.467-1.643 2.126-.94zM370.16 313.19l3.992 1.175-.234 3.293-4.227-2.118-.94-1.176 1.41-1.175z"/></g><path id="gm" d="M366.72 497.006l-.112.96 5.98-.087.304-.892-.13-.898-1.72.7-4.323.216z"/><path id="gn" d="M369.77 505.304l2.63 4.046 3.422-2.974 3.51-.155 2.923 3.882 2.48 1.635.933-1.816.83-.465-.06-3.993-1.65-4.737-5.066.562-6.267-.5-.034 1.605-3.65 2.912z"/><g id="gq"><path d="M427.184 522.134l-.396 1.703 1.19.648 1.144-.855-.397-1.755-1.54.26zM430.77 526.697l-.053 1.202 3.924.197-.05-1.356-3.82-.043z"/></g><g id="gr"><path class="mainland" d="M453.004 427.213l-.096 1.15 4.003 2.014 1.912.734-1.003 1.056-2.23.227-.32 1.01.77 1.738 2.5 1.33 1.09.097.137-2.98 1.635-1.973-4.46-5.272.59-1.79 1.045-.042 1.59 1.28 1.003-.502.32-1.79 3.73.534 1.135-3.24-1.953 1.376-5.73-.14-3.727 1.93-1.94 3.255z"/><path d="M461.69 438.442l1.408.043.59.873h2.05l1.362-.5.46.552-.908 1.192-4.002.14-.728-.96-.77-.458.538-.882z"/></g><path id="gt" d="M183.456 491.11l5.126 3.752 5.17-6.423-.882-1.332-1.764-.062v-3.76l-1.322-.805-4.002 1.193 1.53 3.526-3.856 3.91z"/><path id="gw" d="M368.196 502.356l1.21 2.395 3.397-2.92.035-.9-4.003-.58-.64 2.006z"/><path id="gy" d="M261.4 510.654l6.24 5.652-2.48 2.87-.2 1.703 3.26 3.36-.08 3.233-5.67 2.16-3.396-4.59.726-5.515-1.452-4.105 3.05-4.77z"/><path id="hn" d="M194.408 488.742l7.987-.303 2.37 2.816-1.48-.338-2.843.12-3.717 3.493-1.59 3.537-1.046-.555-.01-3.872-2.3-1.54 2.628-3.358z"/><path id="hr" d="M443.417 407.816l-3.05 2.515h-3.096l-.37 2.18 1.417.37.71-1.054 1.113.977.89 3.112 6.11 2.853.605-.69-6.197-6.397.63-1.165 5.89-.226.595-1.877-3.838.11-1.408-.707z"/><path id="ht" d="M231.845 477.16l2.974.31-.355 3.648-.294 1.92-3.465-.19-.614.925-1.062-.077-.38-1.997 3.656-.305-.225-2.073-1.678-.69 1.443-1.473z"/><path id="hu" d="M444.386 403.01l-1.003 1.573.078 2.403 1.6.82 4.92.147 6.853-5.774.034-1.28-.742-.37-4.953 2.247-6.786.233z"/><g id="id"><path d="M639.517 513.628l-.24 1.97 5.868 9.863h1.71l12.23 20.462 4.895.492 2.445-7.148-3.916-2.464-.735-3.94-22.258-19.234zM697.475 540.89l1.954 2.397-1.272 3.596v.684h2.887l1.02-8.99.935.26 1.694 8.213 1.615.434 1.53-3.512-1.53-5.308-1.272-2.31 3.993-2.91-.934-1.29-3.82 2.48h-1.02l-1.866-2.74.597-1.2 3.146-1.54 4.754 1.454 1.444-.09 3.57-3.334-1.443-1.45-3.312 2.564h-2.127l-3.224-1.538-2.29.086-2.55 4.106-1.616 7.105-.863 2.834zM718.79 524.805l-1.615 3.935 2.55 3.337h.848l1.105-2.223.597-.77-1.105-1.2-1.617-.598-.762-2.48zM723.805 537.73l-3.482.77-1.02 1.114.846 1.453 2.29-.855 1.442-.855 2.126 1.712.935-.772-1.693-2.057-1.445-.51zM666.045 548.854l-2.377 1.625.51 1.363 7.564 1.712 3.82.684 1.615 1.71 4.33.346 2.04 1.71 1.868-.43 1.702-1.54-3.146-1.452-2.714-2.308-7.053-1.713-8.158-1.71zM690.768 556.295l-1.865 1.03 1.104 1.2 2.715-1.027-1.954-1.203zM693.99 555.526l.34 1.625 1.953.51.76-.94-.847-1.29-2.205.096zM698.668 559.805l-2.377.347 2.127 1.798h1.694l-1.442-2.145zM699.342 556.98l-.51 1.026 3.82.596 2.974-1.71-1.694-.512-2.715.77-1.02-.855-.855.684zM711.833 557.583l-4.416 3.683.423.942 1.866-.345 2.205-2.06 4.332-.596-.848-1.452-3.56-.172zM734.126 532.446l-3.604.406-2.315 1.693.96 1.938 3.924.726v.726l-2.48 2.015 1.202 4.193 1.2.078 1.038-4.114h1.92l.805 4.027 9.36 7.746.242 6.05 3.198 3.467 1.442-.077.32-21.37-5.44-3.784-5.124 3.467-1.843 1.132-3.043-1.937-.078-6.128-1.684-.254zM690.69 519.532l-1.998 7.503-10.83 3.656-3.242-3.803-1.573.433 2.94 11.34 4.397.493 5.87 2.222v2.222l2.687-.493 3.917-5.42v-4.435l2.204-4.436 2.446.49-2.938-6.162-.45-3.968-3.43.358z"/></g><path id="ie" d="M394.915 383.085l-.786 5.187-6.976 2.56h-2.223l-1.58-1.115v-.96l3.49-2.238-.95-1.92.156-2.715 3.018.155 1.383-3.25-.183 2.887 2.344 1.858 2.307-.45z"/><path id="il" d="M486.378 444.9l-1.365 4.347 1.77 5.213 2.032-7.616v-1.633l-2.437-.31z"/><path id="in" d="M595 509.688l3.958-1.938 2.352-8.505-.104-10.44 13.468-14.54v-3.448l2.774-1.08-.104-3.985-2.99-5.817 1.71-3.12 3.743 3.448 4.808.216v1.937l-1.495 1.616.318.863 2.567.104.536 2.904h.753l1.928-3.45.96-9.04 3.206-2.266.104-3.12-1.28-2.48-2.03-.105-7.95 5.256.5 3.38-5.585-.02-1.97-2.41-1.072.138.363 3.354-12.075-.863-7.484-3.338-.397-4.106-4.99-3.094-.06-6.37-3.422-3.917-7.867.752.856 3.424 3.854 3.12-6.665 13.642-4.46.337-.734 1.643 4.393 4.062-.216 4.105-4.486-.07-.483 2.04 3.727-.163.104 1.616-2.67 1.4 1.71 3.232 3.312 1.08 2.03-1.504.96-2.687 1.177-.535 1.392 1.398-.425 3.45-.96 1.616.217 2.8L595 509.688z"/><path id="iq" d="M502.793 433.637l-1.348 6.664-5.585 4.65.354 2.196 5.455.37 8.687 7.07 4.857-.137.13-1.635 1.78-1.91 2.49 1.41.33-.313-4.816-6.405-2.282-.14-3.033-3.897.604-2.868.926-.12.32-1.272-4.133-4.348-4.737.685z"/><path id="ir" d="M507.41 427.516l-1.058 1.098.104 1.738 1.314 1.842 4.658 5.1-.71 2.04h-.81l-.407 2.04 2.638 3.372 2.43.207 4.865 6.732 2.732.208 2.126 1.53.105 3.06 8.41 4.9h3.14l1.927-1.633 2.43-.104 1.418 3.268 9.085 1.262.27-3.337 3.007-1.09.14-1.193-2.396-3.268-5.334-4.288 2.8-2.55-.197-1.124-3.51-.544-1.487-11.843-.173-2.722-9.518-3.64-4.218.95-2.36 2.896-2.093-.14-.604.512-4.66-.303-5.878-4.288-2.188-2.394-1.003.24-1.808 2.067-3.187-.6z"/><path id="is" d="M366.26 340.52l-1.692-.958-2.283 1.443-1.962 1.814.052 1.012 2.54.32-.155 1.814-.898.908.217.588 2.54.164v2.938l3.656.64 2.17 1.23 2.437.104 4.186-2.083 3.23-4.27.053-2.888-1.963-1.66-1.642-1.392-.743.536-1.115 1.444-1.27-.164-1.272-1.393-1.642.156-2.386 1.98-1.437 1.546-.795-.69-.053-1.713.795-.536-.57-.89z"/><g id="it"><path class="mainland" d="M423.233 409.39l-.535 1.357.146 1.478 2.065 2.412 3.25-.113 7.174 8.334 4.48 1.297 2.645 2.498.63 5.695 1.417-.828 1.23-3.104-.304-2.23 2.1-.19.305-1.262-5.922-2.834-5.62-5.523-2.237-3.303-.546-3.137 2.86-.684-.733-2.066-1.754-1.478-1.513-.07-2.108.58-1.99 2.78-1.2.796-1.86-1.14-1.982.735z"/><path d="M440.668 431.898l-1.253-.674-4.278.674.146 1.158 3.847 1.937.58.63 1.01.148-.052-3.872zM427.806 423.566l-2.29 1.158.304 4.47 1.833.31 1.374-1.312v-4.235l-1.22-.39z"/></g><path id="jm" d="M221.533 480.798l-3.008.76v.84l1.755 1.012h1.84l1.168-1.35-1.755-1.262z"/><path id="jo" d="M489.473 447.25l-2.126 7.417-.096 1.133h3.347l3.743-3.303.094-1.253-1.53-1.564 2.74-2.272-.396-2.11-.752.174-2.282 1.635-2.74.144z"/><g id="jp"><path d="M709.317 426.193l-1.41 1.418.58 1.997 1.235.086.83 4.332.993 1.08 1.738-1.582.15-4.773-2-2.125-2.116-.432zM716.688 422.188l-2.66 2.156-.59 2.72 1.812 1.25 2.625-2.75.37-3.063-1.557-.312zM713.613 418.033l-4.22 4.832v2.322l2.605-.312 4.085-3.592 2.73-.502.664.78.015 2.377.688 1.25h1.255l1.763-2.158.743-2.837 3.553-.086 3.476-4.166-1.815-6.915-.83-3.664 1.815-1.495-4.133-6.24-.944-.745-1.875.744-.48 2.584v2.083l.993 1.168.33 5.498-2.56 3.164-1.486-.917-1.16 2.584-.25 2.412.91 1.417-.58 1.08-1.902-1.582h-1.322l-1.157.666-.91.253zM720.73 380.396l-1.322 1.168.665 2.498 1.158 1.166-.085 3.83-1.487.578-1.158 2.584 3.388 4.66 2.23-.753.415-1.167-2.396-2.16 1.487-1.92 1.572.25 3.43 2.305.37-2.584 1.63-2.978 2.28-2.312-2.468-1.125-.944-1.8-1.236.83-1.07 1.33-2.317-.5-2.395-1.583-1.746-2.316zM733.2 377.812l-2.316 3.25.164 1.582 1.158-.502 2.723-3.414-1.73-.916zM736.26 373.066l-.828 2.248.086 1.496 1.41-.918 1.32-2.662v-.994l-1.987.83z"/></g><path id="ke" d="M491.142 521.365l2.3 4.484-2.76 5.782-.36 1.754 13.77 8.516 4.27-6.708-2.16-1.754-.043-8.835 2.704-2.956-4.313 1.434-3.258.044-5.1-4.305-1.608-.692-2.98.277-.526.883.064 2.075z"/><path id="kg" d="M565.463 411.316l-.268 2.188.216 1.35 7.522 2.523-6.604 2.662-.75-.624-1.428.917.068.5.76.347 4.636.12 2.35-.708 3.02-3.803 3.775.655 4.556-6.31-12.188-1.66-1.686 4.087-2.127-2.28-1.852.034z"/><path id="kh" d="M655.076 497.982l3.535 3.776 6.577-4.875.58-7.692-3.397 2.344-1.764-.985-2.396-.32-1.34-.942-.65.035-1.753 2.878.285 1.333 1.78.994-.215 2.705-1.24.75z"/><path id="km" d="M514.36 560.013l.395 1.32 1.71.27.657-1.72-2.763.13z"/><path id="kp" d="M687.75 407.047l1.59.666.485 5.566 3.155.182 2.974-3.483-1.03-.917.122-3.734 2.73-3.304-1.39-2.506.907-1.04.5-2.59-1.58-.72-1.35.684-1.67 5.064-2.696-.232-3.12 3.682.374 2.68z"/><path id="kr" d="M696.446 410.443l5.342 4.356.91 4.22-.184 2.263-2.61 2.94-2.248.12-2.55-5.507-.97-2.63 1.03-.794-.243-1.1-1.27-.568 2.793-3.3z"/><path id="kw" d="M519.2 452.774l-1.945-1.056-1.35 1.356.147 2.715 3.14 1.2.008-4.216z"/><path id="kz" d="M513.495 402.163l3.544-1.513 3.958-.14.276 6.052h-2.317l-1.772 2.888 2.317 3.847 3.414 1.928.31 2.205 1.256-.416 1.157-1.375 1.91.415.96 1.928h2.454v-2.473l-1.504-4.4-.684-3.57 4.364-1.928 5.87.96 3.683 3.708 8.323-.82 4.644 6.596 5.455.274 1.504-2.472 1.91-.416.273-2.748 2.862-.14 1.503 1.79 1.505-3.57 12.957 1.79 2.18-2.888-3.684-4.537 4.91-10.72 3.958.275 2.73-6.594-5.454-.553-3.138-3.024-8.644 1.002-11.134-10.762-3.926 3.482-11.902-5.402-14.6 7.148-.406 5.084 3.413 3.985-6.655 3.76-8.636-.19-1.807-2.654-6.77-.373-6.413 4.123-.14 5.638 5.983 4.8z"/><path id="la" d="M650.745 466.397l-2.092 1.062-1.737 5.064 2.904 3.7-.485 4.09.485.195 4.832-2.343 6.482 7.243-.157 4.563 1.41.762 3.482-2.827-.286-2.238-10.053-9.552.096-1.46 1.254-.874-.874-2.438-4.158-.684-1.103-4.265z"/><path id="lb" d="M487.14 440.04l.052 1.687-.708 2.56 2.438.208.156-3.63-1.94-.824z"/><path id="lc" d="M258.746 493.28l-.614 1.306.994 1.07 1.296-.69-1.676-1.686z"/><path id="lk" d="M603.264 505.4l.217 2.35.217 1.712-1.27.216.64 3.848 1.908 1.07 2.966-1.71-.846-4.055.216-1.494-2.756-2.56-1.29.623z"/><path id="lr" d="M378.198 515.027l9.49 6.345-.226-4.805-2.87-3.38-2.8-2.48-3.594 4.32z"/><path id="ls" d="M470.896 606.83l2.637-2.033 1.245.053 1.503 1.875-.154 1.877-2.533.934v.728l-2.792-.156-.673-2.03.77-1.25z"/><path id="lt" d="M452.14 375.236l-2.146.363.173 2.024 3.355.25 1.27 1.042.333 1.81 1.034 1.443 3.068-.13 2.938-3.744-.172-2.222-5.533-.867-4.32.03z"/><path id="lu" d="M420.424 397.582l.76.68.88.082.194-1.734-.253-.974-1.224.583-.356 1.362z"/><path id="lv" d="M462.823 369.964l-6.362-1.037-1.085 2.823-1.833.548-.96-1.173-.96-1.81-1.04.76-.588 3.133v1.708l2.242-.375 4.665.084 5.618 1.044 2.25-.657-.13-2.523-1.815-2.523z"/><path id="ly" d="M429.958 453.518l1.35-.225.397-3.112h.674l2.757-4.527 6.804 1.98 1.857 2.886 6.69 3.06 3.482-1.47-.34-1.47-1.52-1.47.173-1.02 2.473-2.093h4.894l1.856 2.49 3.934.57.51 31.888-2.92-.112-17.652-9.18-1.91 1.08-7.253-1.814-1.97-2.604-2.87-.397-1.46-2.604.043-11.858z"/><path id="ma" d="M402.505 439.903h-9.982l-1.954 4.34-4.505 2.17-3.72 10.06-7.242 4.342-10.174 16.76 9.982-.198.39-4.927h2.54v-6.708h8.81l.196-8.68 8.42-1.97 3.526-5.724 5.48-.198-1.77-9.267z"/><path id="md" d="M465.14 401.376l2.68 4.123-.225 2.333.96.043 2.272-3.847-2.73-3.39-1.548-.64-1.41 1.376z"/><path id="me" d="M449.68 416.677l-1.266 1.79.362 1.098 1.504.275 1.184-1.607-1.784-1.556z"/><path id="mg" d="M526.988 561.474l-1.842 4.374-3.154 5.566-5.523.396-2.37 2.783.397 8.488-3.423 3.978.396 6.76 2.897 3.312 3.423-.396 3.423-2.524-.787-3.977 7.894-13.657-1.582-1.72 1.582-3.312 1.71.526.527-1.322-1.582-6.76-.924-2.784-1.062.27z"/><path id="mk" d="M456.643 418.924l-2.912.96.14 2.472.683.873 3.458-1.607-1.367-2.7z"/><path id="ml" d="M377.584 494.845l2.662-1.823 14.8-.087-3.424-23.806 3.907-.113 18.902 14.428 2.54.362-.958 8.02-11.886 1.08-9.17 6.848-1.67 4.686-6.37.27-1.625-4.677-4.884.346.188-1.53-3.014-4.005z"/><path id="mm" d="M645.533 501.596l-2.396-3.838 1.737-2.438-1.642-3.018-1.548-.294-.294-5.064-2.316-4.486-.675 1.07-1.548 2.63-1.937.293-.968-1.27-.484-3.414-1.453-2.73-5.913-5.576 1.453-.96.27-4.036 2.16-3.63.935-9.033 3.13-2.135.102-3.293 1.877.622 2.956 4.28-2.194 4.7 1.48 3.69 3.654 1.436.666 4.02 4.91.762-1.357 2.343-6.19 2.438-.673 3.993 4.547 5.844.19 3.12-1.063 1.072.095.977 3.39 4.97.095 5.16-.997 1.796z"/><path id="mn" d="M597.438 386.215l5.03-6.673 6.043 2.792 4.106 1.098 5.03-4.615-3.414-2.517 2.248-3.172 6.707 2.37 2.325 3.81 4.2.113 2.195-1.633 4.52-.182.986 1.678 7.512.38 4.754-4.85 6.577.69-.38 6.605 2.88.656 3.534-1.606 3.744 1.85-.088.935-2.714.078-2.827 5.93-2.195.217-8.54 11.16-8.723 3.847-5.455.424-4.53-2.923-5.79 3.095-5.705-1.77-1.617-4.142-10.805-.762-5.532-9.377-2.688-.175-1.387-3.33z"/><path id="mr" d="M364.998 478.266l1.885 2.463-.39 10.65 2.74-1.973 1.953-.397 2.74.985 3.13 4.34 2.938-1.97 14.288-.2-3.526-23.866 3.786-.02-7.054-5.4.01 3.51-8.93.01-.044 6.697-2.567-.01-.328 4.945-10.632.234z"/><path id="mt" d="M440.815 438.34l-1.443.293.052 1.6 1.297.433.58-.484-.485-1.843z"/><path id="mu" d="M544.89 584.008l-1.312 1.72.26 1.858 2.767-2.256-1.715-1.322z"/><g id="mv"><path d="M582.396 516.386l.26 2.256 1.442.527.26-1.99-1.962-.794zM584.238 521.156l-.13 2.784 1.055.525.925-1.856-1.85-1.454zM584.506 526.595l-.925.925 1.057.925 1.313-.925-1.444-.925z"/></g><path id="mw" d="M487.968 567.074l2.69 2.81-.054 3.597.52 1.515 3.57-3.855-.414-4.9-1.912-1.46-1.7-8.602-2.95-.104 1.34 6.196-1.09 4.804z"/><path id="mx" d="M133.847 433.982l4.175 13.146-1.945 1.09.216 2.61 3.674 2.826v5.23l4.538 4.355-1.945-12.848-2.593-8.497.648-5.877 2.16.217.866 1.962-.864 5.005 11.237 21.99v7.84l9.077 10.667 9.94 4.572 4.106-2.396 5.835 4.79 3.46-3.484-1.514-3.925 4.97-1.52 1.513.872 1.512-1.522h2.377l4.32-7.624-2.16-1.962-8.428 1.962-1.945 5.662-4.97.874-5.835-2.396-2.593-8.27 1.96-10.435-4.01-2.5-1.91-10.02-1.6-.682-2.92 2.965-3.355-1.79-1.313-6.68-13.286-1.394-6.863-5.16-6.536.342z"/><g id="my"><path class="mainland" d="M648.36 511.796l1.735 3.898.39 5.064 2.325 3.604 5.096 3.083 1-.79 1.464-.29-.212-1.91-1.84-4.477-2.698-5.73-.227 1.002-3.25-.146-2.334-3.354-1.45.046z"/><path d="M675.527 526.896l2.61 3.018 10.012-3.467 1.978-7.643 4.46-.32 4.08-2.955-5.29-3.855-1.21-2.12-2.61 4.816.958 2.767-1.59 2.31-3-.77-7.27 5.332.188 3.085-3.317-.2z"/></g><path id="mz" d="M482.79 596.36l2.327 1.927 5.48-3.335.88-4.953v-8.18l8.79-7.19 1.507.053 5.322-5.107-.828-10.53-13.81 1.744.52 3.338 2.02 1.757.57 5.73-4.757 4.643-1.14-2.603.207-3.44-2.74-2.973-6.725 3.13 6.258 3.182.21 9.274-4.142 6.146.053 7.385z"/><path id="na" d="M444.22 603.863l2.898.208 1.702 1.72 4.037.053.984-11.462v-7.502l2.586-.52.986-7.867 6.57-.205 2.322-1.927-3.933-.156-5.324.726-5.74-2.082h-16.13l.416 4.58 5.376 7.918-.934 4.062.053 2.136 4.134 10.32z"/><path id="nc" d="M798.706 602.576l-.303 1.547 3.983 5.56 2.145.925.304-2.16-6.128-5.872z"/><path id="ne" d="M413.396 500.17l2.204-.053 1.988-2.98 3.336-.598 3.553 2.17 7.58.215 5.86-2.386 2.205-1.895.164-2.49 4.088-4.122 1.08-9.104-2.688-5.637-6.88-1.677-15.923 12.413-2.256-.218-.97 8.617-8.123.812 4.782 6.928z"/><path id="ng" d="M413.984 515.185l3.39.164 4.087 4.556 1.988.544 1.558-.76 2.367-.33.805-3.302 3.225-2.117 3.492-.162 6.396-11.766-.103-2.653-2.955-2.274-5.913 2.603-7.91-.112-3.77-2.386-2.688.596-1.4 2.438-.104 6.88-2.256 3.198-.208 4.88z"/><path id="ni" d="M203.216 491.62l1.893.38.06 3.882-2.204 6.293-5.938-.588-1.323-3.034 1.764-3.682 3.344-3.11 2.402-.14z"/><path id="nl" d="M421.35 384.572l-3.916 1.928.83.752.087 1.928-.828-.164-.917-1.426-2.188 3.467 3.363.7 1.253 1.322.666.016.44-2.99 2.116-.89-.907-4.644z"/><g id="no"><path class="mainland" d="M460.567 327.41l1.747-1.28-.157-1.435-1.106-.64.158-1.755h.95v-.96l-4.123-1.114-6.18.64-.632 2.714-1.428-.477-.95-1.6-3.018.156-.32 3.032-1.426.64-.794-1.6-6.345 5.11 1.272 1.436-2.378 1.115-5.393 10.7-1.9 1.28.155.96 1.9.958-.475 2.075-3.173-.164-.952-1.114-2.057 2.395-1.27.96-.32 2.24-1.106.64-2.854.64-1.426 4.48.95 7.347 1.107 3.354 1.27 1.28 2.853-.156 4.124-3.994 1.58-2.713.48 3.992 2.696-4.79.154-13.424 2.195-1.383.657-7.408 6.654-9.586 3.173-1.116 1.427-1.755 4.754 1.114 2.377 1.435.796-3.993 3.97-2.396 2.387 4.16z"/><path d="M437.056 285.762l-1.426-1.435-3.164 1.54h-5.81l-.916 3.388 3.26 2.878 1.425-.208 2.04-3.49 1.73 1.234-1.23 2.463-.614 3.596 1.428 2.255 3.06-5.135 3.98-4.832-1.532-1.33-2.23-.926zM438.784 279.6l-2.55 2.36 1.53 2.358h2.748l1.124 1.54 3.363 1.745 3.87-2.256 2.654-2.256-.916-1.85-2.654-1.538-1.938 1.746-1.32-1.644-1.022.104-1.322 2.878-1.936-1.954-.208-1.33-1.424.098zM444.593 290.18l-2.04 1.85-1.73 1.332.813 1.435 1.636.51 2.652-1.235 1.23-1.54-1.125-1.85-1.437-.503z"/></g><path id="np" d="M595.182 448.79l.397 3.69 6.982 3.162 11.193.83-.423-2.705-7.478-2.058-6.346-3.778-4.326.857z"/><g id="nz"><path d="M804.22 655.73l.918 10.198-1.228 4.634-4.6 3.396.305 4.02v4.322l1.228 1.548 12.577-10.814v-2.472h-3.068l-4.298-14.52-1.833-.313zM795.023 677.98l2.455 4.632-6.752 6.492-.613 3.396-4.6.613-7.667 7.104-7.054-3.396-.613-2.473 12.878-5.558 11.965-10.81z"/></g><path id="om" d="M532.244 481.88l6.388-3.684 1.133-5.402-1.4-.804.58-5.792 1.22-.71 1.305 2.05 7.77 4.062v2.258l-9.412 13.854-4.33.147-3.254-5.98z"/><path id="pa" d="M205.68 506.748l-1.262 3.94 4.167 1.08 2.584.512.44-3.052 2.775-1.4 2.463 1.27.968 1.548 1.175-.138.926-2.81-3.078-1.27-2.334-1.272-2.333 1.59-2.774 1.4-2.835-1.14-.88-.258z"/><path id="pe" d="M209.518 541.246l-1.677 1.695.114 2.704 14.643 26.694 15.205 9.802 2.35-3.94.563-8.67-1.228-5.402-4.14-6.984-2.464.786-1.115 1.236-4.918-5.636 1.228-6.647 5.705-3.717-.45-3.492-5.808-.226-3.017-5.064-1.677-.562.114 3.044-7.486 8.895-5.593-1.348-.347-3.166z"/><g id="pg"><path class="mainland" d="M752.132 540.183l-.32 21.126 3.045-.165 4.002-4.676 3.36.163 2.16 1.937.72 5.964 6.88 3.63 1.764-.647v-2.18l-5.523-4.598-2.722-6.294 2.16-1.047-1.6-3.467-3.197-.078-.804-3.71-8.48-5.72-1.444-.242z"/><path d="M778.176 546.008l-.82.19-.5 2.223-1.573 1.022-4.73.83.19 1.78 4.98-.25 3.155-1.972-.188-3.432-.514-.39zM776.093 540.797l-.762 1.08 4.16 3.683.57 2.16 1.132-.13.13-2.22-1.263-1.14-3.967-3.433z"/></g><g id="ph"><path d="M697.337 496.306l-.743 1.418-.414 1.746-4.132 5.246.25 1.08 1.737-.25 5.368-6-2.066-3.24zM704.027 494.31l-.088 4.33 1.572 1.582.578 3.077 1.574.336.742-1.92-1.236-.915-.328-5.41-2.815-1.08zM708.496 495.978l-.087 3.83.907 1.494 1.57-1.832-.413-3.328-1.978-.164zM709.48 492.64l1.573 2.084.743 1.997h1.41l-.25-3.414-1.574-1.08-1.9.415zM712.542 500.472l.328 2.498-2.896 2.334-2.396.25-2.56 2.75.087 1.252 2.396-.75 1.652-1.08 1.408 3.577 2.48 1.747.994-.338.907-1.08-1.978-1.997 1.16-.916 1.32 1.08.907-1.496-.907-1.833-.164-4.08-2.738-1.918zM699.074 475.076l-2.23 1.58-.25 4.998 3.477 6.742 1.16.915 1.484-1.002 2.56.415.492 2.248 1.9.165.91-1.245-1.16-1.582-1.408-1.33-2.974-.328-1.573-2.585 1.817-2.75.163-2.41-1.236-3.077-3.13-.752zM700.232 489.98l.657 2.334 1.157.752.83-1.08-1.323-1.833-1.322-.174z"/></g><path id="pk" d="M553.638 455.082l2.248 3.337-.216 1.72-2.99 1.185-.218 2.8h3.424l1.175-.968h6.52l5.878 5.17.752-2.48h4.383l.104-3.12-4.486-4.306.96-2.368 4.6-.318 6.198-12.924-3.425-2.688-1.278-4.52 8.333-.753-4.917-7-2.62-.71-1.07 1.297-.804.06-4.92 3.12 1.61 2.697-1.816 1.937-2.25 8.29-5.557 3.554-.752 3.882-8.862 3.106z"/><path id="pl" d="M457.11 390.184l.732 1.348.174 1.435-.604 1.392-1.383 2.663-1.168.526-1.514-.658-.908.043-2.204.83-2.506-.742-4.062-2.88-3.978-2.134-1.6-2.44-.303-5.75 3.112-2.704 4.06-1.35 1.33-.138.314 1.007 1.725.692 4.765.09 1.47-.043 2.42 3.708-.603 1.52.26 1.79.467 1.792z"/><path id="pr" d="M249.297 482.068l-2.282-.77-1.833 1.15.917 1.07 3.12.458.077-1.908z"/><g id="pt"><path class="mainland" d="M387.5 421.716l-.537 7.478-1.53 1.384.156.846 1.07 1.772-.69 2.16 1.148.39 2.68-.312-.155-2.16 1.756-10.02-.383-1.383-3.518-.154z"/><path d="M367.834 443.48l-.934 1.186.934 1.185 1.408-.708-1.408-1.66zM337.112 426.713l-1.175 1.184 2.107 1.185.234-1.65-1.166-.72zM343.448 426.004l-1.408.94 1.175.942 1.876-.476-1.642-1.406zM344.382 429.314l-.7 1.892.935 1.185 1.175-.94-1.41-2.136zM350.01 433.092l-.467 1.184.7.71 1.876-1.185-2.11-.708z"/></g><path id="py" d="M267.2 584.458l1.9 2.074-.224 4.392 5.48-.338 4.14 5.3-.336 4.728-2.68 4.054-5.48.225-.225-2.256 1.564-3.718-5.37-3.38h-4.468l-3.354-3.605 2.438-6.968 6.613-.51z"/><path id="qa" d="M527.273 463.018l-.45 3.467 1.332 1.012 1.21-.112.45-4.365-1.048-.752-1.494.75z"/><path id="ro" d="M457.73 401.28l-.225 1.28-5.005 4.166 4.184 6.137 2.682 1.877h4.823l1.59-1.33 2.135-.277 1.59.96 2.82-3.208-.546-1.607-2.862-.734-1.953-.095.094-2.75-2.594-4.08-6.735-.34z"/><path id="rs" d="M452 407.28l-1.77 1.33h-.864l-.588 1.833 2.092 2.43.14 1.928-.883 1.247 3.068 3.197 3.317-1.012-.274-4.72-4.237-6.233z"/><g id="ru"><path class="mainland" d="M722.06 302.16l1.52 5.256 3.044.873 3.042-4.815-1.737-3.285.647-2.845h4.563l-1.09 2.188.434 7.883-6.52 16.2.65 3.5-.217 5.912 12.16 17.73 2.388.656.216-14.443 2.387-2.187-2.61-5.688 2.17-2.412-4.78-6.346-2.61.217-.865-10.503 6.734-1.754.432-3.068 3.478-.873 1.953 1.756 2.385-9.63 4.124-7 3.258-1.756 2.827.217v-3.284l-4.563-.873-6.302-5.256 3.044-3.5-2.61-5.913 2.17-2.187 2.61 3.5 6.518 2.41 7.166.658.873-3.06-3.69-3.718 4.124-5.688-9.345-3.286-2.387 4.814-3.043-3.94-17.158-5.914-16.295 2.844-2.387 1.314v1.313l3.476 1.756-.434 4.158-6.3-2.628-13.9 5.473-2.387-5.03h-9.56l-4.35 4.598-15.42-3.5-14.116 2.844-1.738 4.375 2.17.655-.216 3.285-13.685 1.53.874 4.374-12.604-2.188 3.044-5.688-12.82-.657 1.09 5.914-4.123 1.97-3.475-3.284-14.116 2.412-5.43 5.03-.216 3.06-3.476.217-.433-3.5 11.082-9.63v-6.57l-7.166-1.97-9.344 3.06-3.907-3.942h-1.738l-2.17 4.374 1.737 1.97-12.39 6.788-10.64 8.1-6.52 8.972v3.717l6.95 2.844-3.476 2.627-7.382-2.626-3.044 2.627-4.563-5.255-.873 1.972 4.996 15.758 1.305.44 3.478-1.754 1.737 1.314v2.844l-3.26-1.313-1.954 1.53 1.308 2.843-1.09 7.443-6.733.658-.432-2.412 3.907-2.41.873-6.57-4.35-5.69-1.52-9.845-6.948-1.097-.648 3.5 1.304 1.754-2.825 2.412 1.088 6.57 4.124 1.754.873 4.814-4.133-2.627-10.64-1.97-1.307 3.5-8.473 3.06-1.305-2.186-11.082 6.127-.216 4.16-4.35.656 1.307-3.06v-3.06l-4.35-1.53-2.825 1.098 2.386 4.6 1.737 3.06v2.41l-3.26-.655-.647-.658-3.26 3.5 1.737 3.062-7.383-.217 2.387 3.07-.648 1.312h-3.907l-2.827-1.972-.647-5.472-4.562-1.755v-2.186l9.56 1.972 5.214.44 2.17-3.285-1.954-3.5-13.9-5.472-4.797 1.192-1.64 1.41.51 3.24 2.04.354-.477 5.1 6.293 14.782-4.548 7.21-.312 1.624 2.31 1.625-2.085 1.375-1.382.026.26 6.353 1.91 2.705.026 2.627 2.446.225 3.74 1.426 3.96 5.446.045 1.434-1.288 2.205 2.956-.165 2.878.83 3.892 5.506 9.577.874-.416 6.552-3.3 2.827.682 1.105-3.26 3.502-.864 3.284 1.954 2.845 6.3 2.186 2.612-1.53 16.727 6.346.648-1.756-3.476-3.283v-4.158l-2.17-.657.433-3.5 3.476-4.158-6.23-4.667.43-6.492 6.666-4.382 7.822.44 1.306 2.413 8.04.44 5.87-3.283-3.045-3.285.647-6.13 15.205-7.44 11.695 5.27 3.907-3.5 11.513 10.943 8.688-.873 3.045 3.06 8.255.873 5.43-7.44 6.948 3.067 3.69.658 3.692-3.285-3.26-2.188 2.827-4.374 8.04 2.628 1.735 3.502 3.477.216 2.17-1.53 5.868-.216.647 1.53 6.733.44 4.562-4.814 9.345 1.098 2.827-1.098.864-5.256-2.826-6.346 2.826-2.41h8.904l8.47 10.068 10.858 6.13h3.26l.432-2.628 3.907-2.412.433 14.228-3.475.216v3.5l1.953 2.412-.363 3.13 1.443.597.874-2.188 1.306.44.864.873 3.907-.873 3.905-11.385.434-14.23-4.997-11.384-6.3-7.656-3.045.44v2.412l-7.382-2.845 2.826-6.127 2.387-16.2 9.99-3.06 4.78-3.06h5.213l-1.312 1.755 1.307 2.188 4.563-4.814 2.61.215-.433-2.844-4.132-.873 2.827-10.287 3.737-3.523z"/><path d="M450.108 378.288l-1.296 2.396 4.665.043h.95l-.18-1.352-.727-.854-3.412-.232zM741.137 353.246l-1.07 1.332.086 2.083.992-.085 1.65-2.913-1.658-.416zM776.793 272.303l-2.04 1.33-.483 1.695.96 1.09 2.16-.727 2.16.727 1.202.363-.12-3.994-3.84-.483zM488.54 272.648l1.486.598-1.046 1.798v2.55l-2.23 1.35h-2.377l-1.34-1.65.146-1.8 1.045-1.35h2.084l2.23-1.496zM494.192 270.998v1.798l1.486 1.202 2.083-.146 1.79-1.65v-1.203h-1.635l-1.34.448-1.046-1.2-1.338.75zM502.68 271.152l1.047 2.248 2.084.147 1.487-.596-.742-2.1-1.937-.45-1.937.752zM511.16 268.154l-1.634-.303-1.487 1.505.743 1.35.45 2.1 1.936-1.496.448-1.65-.457-1.506zM520.237 284.05l-.45 2.1-3.424 3-7.294 1.652-5.958 9.897-1.046 2.852 5.957 1.505.89-3.597 1.79-5.55 4.614-2.402 3.872-3 2.825-1.2h1.487v-4.047l-3.265-1.21zM501.04 305.946l4.018.45 1.342 4.65 3.423 3.596-1.193 2.402h-2.083l-1.937-2.248-4.313-.146-1.79-2.403v-1.65l2.683-.753-.15-3.898zM563.855 254.81l-1.938-1.204h-2.23l-.448 1.35-2.378 1.35-1.79.596-.294 1.798 4.167.303 4.91-4.194zM568.463 255.257l-1.047 2.247-2.083-.146-3.276 2.402-.89 3h2.083l1.193-1.953 2.826 2.1 2.68-1.2 1.937-1.65-.744-2.552-1.046-1.798-1.634-.45zM572.784 256.908l1.046 4.2 1.634 3.898 1.79-3.146 3.423-.752v-2.248l-2.23-1.65-5.663-.302zM654.453 250.184l2.326 1.953 1.648-.683.484-2.74-3.39-2.342-2.23 1.47-5.427.492v2.445l-5.724.095v4.002l6.69 4.98 1.748-1.272-.39-3.52 4.27-1.07-.873-1.66-1.547-1.563 2.415-.588zM660.66 247.84l1.547 2.932 6.017-.684 1.65-2.152-.39-1.857-1.65-.685-1.547 1.176-4.46.98-1.167.29zM660.27 259.268l-3.01-.777-1.735 1.858-.778 2.54 4.07-.388 3.105-1.564-1.65-1.668zM738.23 242.37l-2.522-.78-2.904 1.073-1.453 2.15 1.843 2.447 4.85-2.15.968-1.073-.78-1.668zM739.156 358.33v3.664l1.16.415.827-1.333v-2.827l-1.987.08zM705.35 345.086l-.076 5.333 6.69 10.33 2.395 8.988 4.218 7.996 1.65.58 1.408-1.168.657-1.918-6.033-6.578.164-3.416 1.322-.578.33-1.997-11.817-16.736-.91-.838zM751.967 328.516l-1.65.164.994 1.418 2.066 1.418.58-.666-1.99-2.334zM755.183 329.52l.25 1.416 2.56.752.252-1.002-3.062-1.166zM769.23 334.956l1.08 1.937 1.8-.12.36-1.333-3.24-.484zM787.356 337.98l1.442 2.662 1.08-1.21v-1.814l-2.522.362z"/></g><path id="rw" d="M479.896 532.93l2.43 2.24-.105 2.395-3.768.077v-2.646l1.444-2.065z"/><path id="sa" d="M519.812 458.02l6.06 8.444 1.954 1.558.874 3.785 9.327.734 1.055.555-1.046 4.667-6.13 3.613-8.963 2.715-4.78 4.668-5.68-3.312-3.438 3.01-4.79-7.824-3.285-1.504-1.192-1.807v-3.915l-11.954-14.452-.45-2.56h3.44l4.183-3.612.146-1.807-1.192-1.2 2.396-1.954 5.084.302 8.67 7.226 5.116-.232.33 1.263 4.266 1.64z"/><g id="sb"><path d="M783.786 549.882l1.072 2.98 1.892 1.843.57-.51-.19-1.972-2.144-2.603-1.2.262zM789.016 554.324l.13 1.97 1.2 1.142 1.135-.7-1.01-2.102-1.454-.31zM790.528 559.218l-1.012 1.08 1.07 1.97 1.263.382-.06-1.33-1.262-2.102zM792.992 558.076l.882 2.16 1.702 2.03.943-1.52-1.264-2.16-2.264-.51zM797.41 561.317l.5 2.67 1.203 1.65 1.01-2.09-2.714-2.23zM798.792 567.29l-.44.76 1.452 1.912 1.012.062-.632-2.482-1.392-.25zM795.576 571.094l-1.514.7 1.323 1.843 1.133-.64-.942-1.903z"/></g><g id="sc"><path d="M535.676 548.87l-.525 1.062 1.443 1.192 1.056-1.192-1.974-1.062zM543.05 540.92l-1.583 1.06 1.186 1.858h1.582l-1.186-2.92zM543.706 545.56l-1.055 1.193.787 1.192 1.442.27.13-2.523-1.304-.132z"/></g><path id="sd" d="M466.144 505.035l-2.55-1.504-2.325-4.59.13-4.27 3.223-2.772.155-10.228 2.127.062-.242-5.68 22.302.198 3.19-3.215 6.88 11.004-3.77 4.44v6.786l-4.6 9.89-1.04 2.3-3.708-5.315-2.708 3.442-3.06.834-9.94-1-4.334 1.54.268-1.92z"/><g id="se"><path class="mainland" d="M445.232 329.52l1.693 1.563h3.173l1.746 3.354.477 5.748-4.277 3.035v3.033l-3.017 4.158-1.746.155-2.378 3.994.155 3.837 4.124 3.035-.318 1.754-1.582 2.396-2.377 2.074.155 6.872-3.647 1.28-1.27 2.712h-1.747l-.95-4.79-3.968-6.083 3.26-5.455.225-13.477 2.248-1.236.545-7.71 6.405-9.172 3.074-1.078z"/><path d="M445.898 368.927l-1.824 1.443.917 2.118 1.617-1.573-.71-1.988z"/></g><path id="sg" d="M658.314 527.705l.686.39 1.548-.127-.13-1.167-1.262.2-.842.705z"/><path id="si" d="M442.708 405.076l-2.195 1.314-4.097.898.82 2.368 2.87.034 2.646-2.213-.044-2.4z"/><path id="sk" d="M443.607 400.875l.597.527.077.898 6.597-.146 4.875-2.102-.077-2.135-.934.415-1.34-.718-.82-.035-2.16.864-2.94-.71-3.873 3.14z"/><path id="sl" d="M372.804 509.79l4.884 4.72 3.483-4.227-2.178-3.415-3 .303-3.188 2.62z"/><path id="sn" d="M372.424 498.77l-5.792-.14 1.072 2.603.596-1.607 7.27.76.807-.027 3.405.12.12-1.505-3.11-3.733-3.467-4.693-2.152-.9-1.66.425-3.406 2.472-.776 1.384-.24 1.384 1.252.9 4.185-.062 2.688-.728.303 1.322-.24 1.746-.854.28z"/><path id="so" d="M526.703 501.94l3.777-1.45 1.34.803-.147 3.354-3.482 9.923-18.853 20.19-2.187-1.503-.147-8.52 2.835-3.26 6.018-1.858 8.824-9.32 2.31-2.057.647-3.008-.934-3.294z"/><path id="sr" d="M268.384 516.715l1.763 1.616 2.73-1.693 2.49.078-.32.968-1.045 2.18-.164 5.42-4.97 2.022.242-3.476-3.207-2.992.164-1.538 2.317-2.585z"/><path id="ss" d="M489.336 508.02l-2.04.897.647 3.553h2.542l3.448 5.004-2.767.354-.71 1.288-.068 1.857-8.298-.146-.848-1.288-5.8-.33-10.65-10.96 1.064-.64 4.517-1.365 9.897.754 3.366-.755 2.235-2.996 3.466 4.77z"/><g id="st"><path d="M421.91 530.554l.994-.502.743.604-.743 1.148-.9-.354-.093-.896zM423.907 527.398l1.496-.25.5.95-.742.805-.742-.104-.51-1.402z"/></g><path id="sv" d="M189.308 495.217l4.062 2.022-.06-3.208-2.084-1.27-1.918 2.455z"/><path id="sy" d="M487.545 437.18l-.302 2.196 2.437 1.02-.104 6.087 2.438-.053 2.438-1.842.916-.155 5.532-4.398 1.114-6.39-11.056 1.125-1.167 2.56-2.245-.15z"/><path id="sz" d="M482.53 596.983l-2.168.36-.935 2.553 1.66 1.513h2.014l1.703-2.447-2.272-1.98z"/><path id="td" d="M440.97 494.983l.113-2.552 4.098-3.982 1.1-9.785-2.73-5.22 1.91-.98 18.498 9.64-.113 9.455-3.26 2.775v4.875l2.137 4.132h-3.77l-6.24 6.173-.165 1.867-4.605-.06-.06.845-2.63-.345-1.797-3.397-1.35-.666.173-1.037 1.693-1.297v-6.066l-2.342-.363-2.826-2.102 2.17-1.91z"/><path id="tg" d="M408.495 516.81l2.316-1.356-.052-8.946-1.504-2.438-.967.812.208 11.928z"/><path id="th" d="M646.043 472.915l2.8 3.604v4.383l.968.482 4.453-2.144.873.295 5.316 6.138-.19 4.192-1.737-.294-1.548-.978-1.158.097-2.032 3.403.39 1.85 1.642.874-.095 2.05-1.157.587-3.97-2.73v-2.44l-1.642-.094-.674 1.07-.347 10.91 2.567 4.685 4.547 4.383-.19 1.27-2.422-.093-2.22-3.31h-2.326l-2.902-2.346-.874-2.438 1.254-2.05.432-1.85 1.366-2.42-.06-5.566-3.338-4.823-.14-.588 1.082-1.09-.25-3.83-4.442-5.626.52-3.242 5.503-2.323z"/><path id="tj" d="M559.74 422.234l3.552-4.408h1.34l.467.984-1.643 1.192v.985l1.08.777 5.196.312 1.693-.727.77.153.52 1.66 3.085.312 1.55 3.267-.468.985-.614.053-.612-1.245-1.34-.104-2.316.313-.156 2.18-2.316-.155.104-2.75-1.694-1.658-2.575 2.125.053 1.4-2.265.778h-1.34l.104-4.824-2.174-1.606z"/><path id="tm" d="M528.328 418.56l-.535 2.274h-3.588v3.078l3.854 2.54-1.192 3.483v1.608l1.6.27 2.126-2.812 4.79-1.07 10.233 3.882.13 2.81 5.713.535 6.38-6.698-.796-2.146-4.253-.935-11.963-7.772-.535-2.81h-4.52l-1.998 3.753h-1.997l-3.45.01z"/><path id="tn" d="M425.516 435.624l4.78-1.927 1.572 1.02.06 1.244-.733.96.11 1.703.736.396v3.06l-.846 1.418.11.908 3.208 1.132-2.584 4.02-1.012-.06-.173 3.23-1.124.175-.96-.85.225-3.283-3.146-3.06-.398-2.663 1.52-1.192-1.346-6.23z"/><path id="tr" d="M472.812 421.906l-2.305-1.426-1.27-1.013-2.14.916-1.476 3.74 2.22-.5 1.562-1.188 3.438.938-1.946 1.877-5.175-.25-1.91 2.093v1.02l1.22 1.022v1.123l-.512 1.332.51 1.123 1.626-.812 1.625 1.738-.407 1.228-.604.82.906 1.02 4.46.917 3.14-1.33v-1.938l1.52.303 3.65 2.144 3.947-.614 1.72-1.633 1.115.406v1.842h1.52l1.314-2.55 11.55-1.23 5.04-.612-1.332-1.746-.025-2.36 1.01-1.21-3.68-2.955.196-2.552h-2.02l-3.355-1.643-1.93 2.04-7.087-.208-4.253-2.55-4.082.367-4.544 2.73-3.238-.418z"/><path id="tt" d="M258.97 502.572l-.917.847-.994.154v1.228l1.832 1.687.76-1.23.458-1.383-.156-1.15-.984-.155z"/><path id="tw" d="M695.686 453.76l-3.06 2.334-.163 4.494 2.646 3.078.655-.58-.08-9.326z"/><path id="tz" d="M492.22 560.017l13.797-1.69-3.395-6.57-.182-6.29 1.098-3.01-14.367-9.023-4.5.743-1.565 1.158-.14 2.637-1.01 3.656-1.056 1.253-1.515.142 2.81 9.418 4.815 2.838 4.195.1 1.015 4.64z"/><path id="ua" d="M460.662 388.79l-2.507 1.41.622 2.663-2.316 4.884.02 2.15 1.09.692 6.983.345 1.954-1.615 2.092.7 2.998 4-2.194 3.943 2.61.76 3.414-3.932 1.954.355 1.815 1.262-1.6 2.11 2.16 3.37h2.3l1.184-2.248 2.44-.495.068-1.823-4.53-.7.14-1.963h4.392l4.737-3.795 2.092-1.824.344-5.756-9.336-.838-3.83-5.402-2.645-.908-3.207.14-1.443 3.568-6.57.087-2.135-.985-3.096-.154z"/><path id="ug" d="M480.31 532.23l2.62 2.454 1.643-1.045 4.442-.73.762.08.284-1.688 2.51-5.272-2.11-4.392-6.837.044-.043 1.808.917.882-.14 1.807-4.046 6.05z"/><g id="us"><path class="mainland" d="M143.59 375.99l-.866 3.474-3.017-1.954h-1.504l-.865 3.69-10.554 23.65 2.8 20.607 3.45 1.737.648 5.645h7.105l6.89 5.203 13.56 1.305 1.505 6.94 2.152 1.522 3.017-3.033 2.37 1.08 2.152 9.976 3.656 2.386 3.017-5.646 9.258-6.726 6.025 2.817 5.17.433.215-3.25 10.762.217 2.152 2.386.432 5.42-1.29 3.035 1.505 5.203h3.233l3.232-4.987-1.288-2.385-1.288-5.204 1.936-5.86 8.826-7.59 6.673-1.952-.865-6.293 9.258-9.983 9.258-1.52-1.503-5.194 9.042-5.205v-6.94l-.866-.433-3.233 1.082-.43 4.252-10.746.13-8.42 5.593-13.216 4.322-2.11-2.587 6-9.076-2.965-2.826-2.014-3.837-4.176-3.354-4.538-.38-8.575-5.853-60.97-10.038z"/><path d="M74.79 285.234l2.992 5.594 1.92-.432v-1.938l-4.91-3.224zM57.926 334.428l-.147 2.602 1.866-.432v-1.158l-1.72-1.012zM55.057 335.586l-3.734 1.885.58 2.023 1.434-1.158 2.87-1.306-1.15-1.444zM39.54 338.042l-2.583-.58-.432 1.16.285 2.168 2.73-2.748zM34.078 337.902l-2.446-1.01-.865 1.59 1.582 1.59 1.728-2.17zM95.485 277.922l-7.252 1.72 1.496 8.17 7.89 2.15.424 1.72-11.73 3.657L79.7 306.3l2.344 11.608 3.838 2.576 2.99-2.793.857 1.722-3.63 4.296-14.083 6.45-8.964 2.15-.216 3.225 20.694-6.016 8.533-2.37 7.892-9.673 8.748-5.8-4.478 7.52 4.91.648 8.324-3.656 1.495 6.017 5.757 1.288 5.973 5.8.423 4.297-.855 1.072 1.063 4.08h1.496l.216-6.882h1.703l.424 16.977 4.27-3.657-2.99-17.625h-4.478l-4.91-6.23 24.108-40.845-23.892-18.696-26.667 5.16-1.063 8.17 5.757 3.438-2.136 5.594-7.67-6.222z"/></g><path id="uy" d="M274.633 612.48l-1.773 1.895.735 10.183 5.566 1.615 7.08-7.097-11.607-6.595z"/><path id="uz" d="M558.643 428.477l2.662.138v-4.556l-2.522-1.47 4.253-5.36h1.73l1.728 2.016 4.52-1.738-6.25-2.144-.24-1.297-1.486.363-1.46 2.54-6.303-.206-4.625-6.543-8.125.804-3.872-3.838-5.358-.906-3.89 1.582 2.256 7.502.025 2.524 1.643.035 2.014-3.84 5.36.07.795 2.946 11.487 7.624 4.442 1.02 1.217 2.733z"/><g id="vc"><path d="M258.823 496.582l-1.063.77.84 1.54 1.373-.77-1.15-1.54zM257.526 499.573l-.994.994.38.612h1.22l.38-1.004-.986-.603z"/></g><path id="ve" d="M231.5 503.558l.38 2.24 2.81.89.64-4.123 2.964-3.068 2.965 3.475 6.82 1.86 5.773-1.212 3.933 4.85 2.965 1.857-3.25 4.953 1.09 3.752-1.858 2.3-1.928 1.615-4.175-2.102-.96.97v2.99l3.052 1.45-2.248 2.43-2.248 2.43-2.965-.24-2.98-3.276-.632-12.327-10.183-3.476-1.85-5.42 1.885-2.82z"/><path id="vn" d="M659.035 502.287l1.027 1.616.19 1.85 2.705.295 3.286-4.383 3.095-.873 1.643-4.478-.77-7.21-3.19-4.383-3.36-2.687-4.28-7.35 3.07-5.134-4.394-5.04-3.517-.154-3.165 1.702.942 4.07 4.22.744 1.132 3.138-1.488.97.096.776 9.896 9.683.388 2.843-.595 8.99-6.932 5.014z"/><g id="vu"><path d="M811.006 582.48l-1.07 1.434.45 1.616.534.362.98-1.262-.894-2.15zM811.542 586.88l.087 1.166 1.157.363.805-.45-.805-1.264-1.245.183zM813.236 597.303l-.536.812.804.897 1.34-.448-1.608-1.26z"/></g><g id="ye"><path class="mainland" d="M509.432 489.13l1.244 3.7v3.614l2.99 2.714 21.075-8.584.2-2.36-3.382-6.066-8.48 2.706-4.865 4.787-5.645-3.335-3.136 2.826z"/><path d="M533.315 498.138l1.842 2.06 2.49-1.505.896-.304-1.14-1.106-2.19.647-1.898.208z"/></g><path id="za" d="M476.73 588.02l-6.828 6.31-1.625 3.9-5.41-.675-4.504 4.002-2.99-.294.24-5.53-1.062-.373-.742 11.314-5.308-.052-1.6-1.886-2.344-.024 2.137 6.13 3.812 3.603-2.723 3.172 1.764 3.977 4.08 1.558 3.25-2.767 9.31.053.668-.83 4.132-.728 13.978-13.917-.053-4.382-1.494 1.938h-2.238l-2.723-2.282 1.383-3.44 2.378-.482-.217-7.07-5.27-1.224zm-3.275 15.99l1.306-.05 2.12 2.298-.062 2.662-2.48 1.253-.156.883-3.785.043-1.186-2.854 1.082-2.092 3.163-2.143z"/><path id="zm" d="M459.78 571.656l2.74 3.802 4.243.26 1.504.83 4.443.053 3.83-5.366 10.7-4.79.935-4.218-1.244-6.043-5.583-3.18-3.727.26-1.857 4.113.053 1.876 4.39 2.136.26 4.642-3.774.208-.935-1.564-10.495-4.48-.31 3.44-4.963.156-.21 7.866z"/><path id="zw" d="M468.52 578.226l7.755 8.757 5.946 1.513 3.985-6.248-.312-8.28-6.465-3.338-2.43 1.098-3.62 5.524-5.015-.053.157 1.026z"/></g><g class="world-bubbles" pointer-events="none"></g></svg>
       </div>
-      <div class="country-unknown" id="countryUnknown" hidden></div>
       <div class="country-attribution">Map &mdash; Al MacDonald &middot; Fritz Lekschas &middot; <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 3.0</a></div>
     </div>
   </div>
@@ -1628,7 +1592,6 @@
         <div class="shortcut-row"><span class="sk-label">Grid view</span><span class="sk-keys"><kbd>G</kbd></span></div>
         <div class="shortcut-row"><span class="sk-label">Matrix view</span><span class="sk-keys"><kbd>M</kbd></span></div>
         <div class="shortcut-row"><span class="sk-label">Country heat map</span><span class="sk-keys"><kbd>C</kbd></span></div>
-        <div class="shortcut-row"><span class="sk-label">Toggle theme</span><span class="sk-keys"><kbd>Shift</kbd><kbd>D</kbd></span></div>
         <div class="shortcut-row"><span class="sk-label">Toggle density</span><span class="sk-keys"><kbd>Shift</kbd><kbd>E</kbd></span></div>
         <div class="shortcut-row"><span class="sk-label">Row up / down</span><span class="sk-keys"><kbd>&uarr;</kbd><kbd>&darr;</kbd></span></div>
         <div class="shortcut-row"><span class="sk-label">Close / cancel</span><span class="sk-keys"><kbd>Esc</kbd></span></div>
@@ -1863,6 +1826,8 @@ async function computeOverlapsStream(file, progressCb) {
   }
   console.info('[overlap] Country coverage after parse: %d of %d records (%d distinct countries)',
     withCountry, totalRecs, distinct.size);
+  /* `rowCount` = total data rows read from the SRB file. Feeds the header's
+     "MixedID assignments processed" stat. */
   return { ruleEntries, rowCount };
 }
 
@@ -1942,6 +1907,10 @@ function computeOverlaps(rows, header) {
       overlappingWith: ow, records, hasSrb: cSrb !== undefined });
   }
   ruleEntries.sort((a,b) => b.overlapCount - a.overlapCount);
+  /* Attach the SRB-file row count as an array property so the existing
+     `territories = computeOverlaps(...)` callsite continues to receive an
+     array while new code can still read `.rowCount` for the header stat. */
+  ruleEntries.rowCount = rows.length;
   return ruleEntries;
 }
 
@@ -2022,6 +1991,12 @@ function parseRules(rows, header) {
 /* ===== Import handling ===== */
 let file1Ref = null, file1Data = null, file2Data = null, file1Name = '', file2Name = '';
 let RULES = {};
+/* Raw ingest counters — drive the header stat strip ("Rule records processed"
+   and "MixedID records processed"). Populated on every analyze / cache restore
+   and displayed by launchApp(). Kept separate from DATA because DATA only
+   contains overlapping rules, whereas these numbers describe the full payload
+   the report was asked to chew through. */
+let INGEST_COUNTS = { rulesIngested: 0, mixedIdRowsIngested: 0 };
 
 const dz1 = document.getElementById('dropZone1'), fi1 = document.getElementById('fileInput1');
 const dz2 = document.getElementById('dropZone2'), fi2 = document.getElementById('fileInput2');
@@ -2117,19 +2092,30 @@ launchBtn.addEventListener('click', async () => {
   const t0 = performance.now();
   importProgress.textContent = 'Streaming SRB file...';
   try {
-    let territories;
+    let territories, mixedIdRows = 0, ruleRowsProcessed = 0;
     if (file1Ref) {
       const result = await computeOverlapsStream(file1Ref, msg => { importProgress.textContent = msg; });
       territories = result.ruleEntries;
+      mixedIdRows = result.rowCount || 0;
     } else {
       const h1 = file1Data[0], r1 = file1Data.slice(1).filter(r => r.some(c => c.trim()));
       territories = computeOverlaps(r1, h1);
+      mixedIdRows = territories.rowCount || r1.length;
     }
     if (file2Data) {
       importProgress.textContent = 'Processing territory rules...';
       const h2 = file2Data[0], r2 = file2Data.slice(1).filter(r => r.some(c => c.trim()));
       RULES = parseRules(r2, h2);
+      /* Raw row count of the Rules Summary file — exactly what the header
+         "Rule records processed" stat is meant to display. Blank trailing
+         lines are excluded by the same non-empty filter parseRules uses,
+         so the number matches what a user would count in the file. */
+      ruleRowsProcessed = r2.length;
     }
+    INGEST_COUNTS = {
+      rulesIngested: ruleRowsProcessed,
+      mixedIdRowsIngested: mixedIdRows
+    };
     const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
     importProgress.textContent = 'Done in ' + elapsed + 's';
     setTimeout(() => { importProgress.style.display = 'none'; }, 800);
@@ -2137,6 +2123,7 @@ launchBtn.addEventListener('click', async () => {
     ovCacheSet('territories', territories);
     ovCacheSet('importedAt', nowIso);
     ovCacheSet('schemaVersion', OV_CACHE_SCHEMA);
+    ovCacheSet('ingestCounts', INGEST_COUNTS);
     if (file2Data) ovCacheSet('rulesFile', file2Data);
     setImportTimestamp(nowIso);
     launchApp(territories);
@@ -2156,9 +2143,10 @@ function setImportTimestamp(iso) {
 
 (async function restoreOverlapCache() {
   try {
-    const [cachedTerr, cachedRules, cachedTs, cachedVer] = await Promise.all([
+    const [cachedTerr, cachedRules, cachedTs, cachedVer, cachedCounts] = await Promise.all([
       ovCacheGet('territories'), ovCacheGet('rulesFile'),
-      ovCacheGet('importedAt'), ovCacheGet('schemaVersion')
+      ovCacheGet('importedAt'), ovCacheGet('schemaVersion'),
+      ovCacheGet('ingestCounts')
     ]);
     /* Reject caches written before the current schema (e.g. before `country`
        was captured on each record). This prevents the app from silently
@@ -2172,16 +2160,31 @@ function setImportTimestamp(iso) {
       return;
     }
     if (cachedTerr && cachedTerr.length) {
+      /* Track the raw rule-file row count inline so the header stat is
+         accurate for both old caches (where we can recompute it here) and
+         new caches (where it was saved explicitly). */
+      let ruleRowsFromCache = 0;
       if (cachedRules) {
         file2Data = cachedRules;
         const h2 = cachedRules[0], r2 = cachedRules.slice(1).filter(r => r.some(c => c.trim()));
         RULES = parseRules(r2, h2);
+        ruleRowsFromCache = r2.length;
         dz2.classList.add('loaded');
         document.getElementById('dz2Text').textContent = 'Cached';
       }
       dz1.classList.add('loaded');
       document.getElementById('dz1Text').textContent = 'Cached';
       if (cachedTs) setImportTimestamp(cachedTs);
+      /* Restore ingest counters. Prefer the freshly-computed Rules-file
+         row count over anything cached (it's always available and always
+         accurate), but fall back to the cached mixedId count when we
+         don't have the raw SRB file in memory to recount. */
+      const cachedMixed = (cachedCounts && typeof cachedCounts === 'object') ? (cachedCounts.mixedIdRowsIngested || 0) : 0;
+      const approxMixedRows = cachedMixed || cachedTerr.reduce((s, t) => s + (t.records ? t.records.length : 0), 0);
+      INGEST_COUNTS = {
+        rulesIngested: ruleRowsFromCache,
+        mixedIdRowsIngested: approxMixedRows
+      };
       launchApp(cachedTerr);
     }
   } catch(e) { console.warn('Overlap cache restore failed:', e); }
@@ -2222,18 +2225,23 @@ const rlbl = r => {
 
 function showReportControls(show) {
   const d = show ? '' : 'none';
-  // `ovSep1` was removed when the import block was lifted into the header.
-  // Everything below is still inside the toolbar / KPI row / header-imports.
+  // `ovSep1` was removed when the import block was lifted into the header;
+  // `kpiRow` was removed when the KPI summary cards were retired. Everything
+  // left here lives inside the toolbar or the header.
   ['searchInput','filterTeam','filterSubTeam','filterJob','filterTerr','clearFiltersBtn','ovSep2','viewSwitcher','savedViewsBtn','exportAllBtn','exportBtn','importNewBtn'].forEach(id => {
     const el = document.getElementById(id); if (el) el.style.display = d;
   });
-  document.getElementById('kpiRow').style.display = show ? 'flex' : 'none';
 }
 function launchApp(ruleEntries) {
   DATA = ruleEntries;
   showReportControls(true);
   document.getElementById('overlapStats').style.display = 'flex';
-  document.getElementById('statRules').textContent = DATA.length.toLocaleString();
+  /* Header stats display INGEST volumes (what this report actually chewed
+     through) rather than the overlap-only subset. The analyze button, the
+     cache restore, and the Coin-Sort auto-launch all set INGEST_COUNTS
+     immediately before calling this function. */
+  document.getElementById('statRules').textContent = (INGEST_COUNTS.rulesIngested || 0).toLocaleString();
+  document.getElementById('statMixed').textContent = (INGEST_COUNTS.mixedIdRowsIngested || 0).toLocaleString();
   const teams=new Set(), jobs=new Set(), terrs=new Set(), subTeams=new Set(), tm=new Set();
   for (const t of DATA) {
     terrs.add(t.territoryCode);
@@ -2242,12 +2250,12 @@ function launchApp(ruleEntries) {
       if (r.salesSubTeam) subTeams.add(r.salesSubTeam);
     }
   }
-  document.getElementById('statMixed').textContent = tm.size.toLocaleString();
   // ----- Severity scoring (weighted, normalized) -----
   computeSeverityScores(DATA);
-  // ----- KPI cards (portfolio-deduped) -----
+  // ----- Portfolio totals (deduped) — feeds the insights panel; used to
+  //       live in KPI cards before those were retired. -----
   const hasSrb = DATA.length && DATA[0].hasSrb;
-  const kpi = updateKpis(DATA, hasSrb);
+  const kpi = computePortfolioStats(DATA);
   // ----- Insights panel -----
   renderInsights(DATA, { hasSrb, totalSrb: kpi.totalSrb, tm, critCount: kpi.critCount, highCount: kpi.highCount });
   // ----- Wire watchlist + compare + URL state -----
@@ -2261,12 +2269,12 @@ function launchApp(ruleEntries) {
   announce(`Analysis loaded. ${DATA.length} rules, ${kpi.critCount} critical.`);
 }
 
-/* KPI computation + rendering.
-   Called with DATA on initial load, and with the currently-filtered list on
-   every filter change, so the cards always reflect what is shown in the grid.
-   All values are portfolio-deduped across the provided dataset: each unique
-   MixedID contributes its SRB once even if it overlaps across multiple rules. */
-function updateKpis(dataset, hasSrb) {
+/* Portfolio totals (pure computation — no DOM).
+   All values are deduped across the provided dataset: each unique MixedID
+   contributes its SRB once even if it overlaps across multiple rules. This
+   used to also drive four KPI cards; those were removed, but the insights
+   panel + announce() still need the totals. */
+function computePortfolioStats(dataset) {
   const srbByMixed = new Map();
   const mixSet = new Set();
   const terrSet = new Set();
@@ -2283,15 +2291,6 @@ function updateKpis(dataset, hasSrb) {
   for (const v of srbByMixed.values()) totalSrb += v;
   const critCount = dataset.filter(t => t._sevKey === 'crit').length;
   const highCount = dataset.filter(t => t._sevKey === 'high').length;
-
-  tweenNumber('kpiSrb',   totalSrb,     hasSrb ? v => '$'+fmt(v) : () => '\u2014');
-  tweenNumber('kpiRules', dataset.length, v => v.toLocaleString());
-  tweenNumber('kpiMixed', mixSet.size,  v => v.toLocaleString());
-  tweenNumber('kpiTerr',  terrSet.size, v => v.toLocaleString());
-
-  const rulesKpi = document.getElementById('kpiRules');
-  rulesKpi.title = `${critCount} Critical \u00B7 ${highCount} High \u2014 click for details`;
-
   return { totalSrb, critCount, highCount, mixCount: mixSet.size, terrCount: terrSet.size };
 }
 
@@ -2484,6 +2483,7 @@ document.getElementById('importNewBtn').addEventListener('click', () => {
   document.getElementById('overlapStats').style.display='none';
   importError.style.display='none'; importProgress.style.display='none';
   file1Ref=null; file1Data=null; file2Data=null; RULES={}; RULES_BY_CODE={};
+  INGEST_COUNTS={ rulesIngested:0, mixedIdRowsIngested:0 };
   dz1.classList.remove('loaded'); document.getElementById('dz1Text').textContent='Drop SRB File'; dz1.title='SRB Assignment File (required)';
   dz2.classList.remove('loaded'); document.getElementById('dz2Text').textContent='Drop Rules File'; dz2.title='Rules Summary File (optional)';
   fi1.value=''; fi2.value=''; launchBtn.disabled=true;
@@ -2556,10 +2556,6 @@ function applyFilters() {
      grid/matrix views when a chip is active. */
   filtered = applyChipFilter(filtered);
   filteredNoCountry = applyChipFilter(filteredNoCountry);
-
-  // Keep KPI cards in sync with whatever's shown in the main grid.
-  const hasSrb = DATA.length && DATA[0].hasSrb;
-  updateKpis(filtered, hasSrb);
 
   selectedRuleIdx=-1; renderLeft(); clearRight();
   updateUrlState();
@@ -2675,7 +2671,15 @@ function getRuleMeta(ruleCode) {
 function renderRight(rule) {
   currentSelectedRuleCode = rule.ruleCode;
   const sm=document.getElementById('drawerSummary');
-  sm.innerHTML=`<span><span class="label">Rule:</span><span class="mono">${rule.ruleCode}</span></span><span><span class="label">Territory:</span><span class="mono">${rule.territoryCode}</span></span><span><span class="label">MixedIDs:</span><span class="mono" style="color:var(--accent)">${rule.overlapCount.toLocaleString()}</span></span><span><span class="label">Parent Accts:</span><span class="mono">${(rule.parentAcctCount||0).toLocaleString()}</span></span><span><span class="label">Accounts:</span><span class="mono">${(rule.acctCount||0).toLocaleString()}</span></span>`;
+  // Show readable Territory Name + Rule Name above the detail grid (fall
+  // back to the raw code if a name isn't available). Codes are preserved
+  // on the title attribute so users can still hover for the machine key.
+  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const terrName = rule.territoryName || rule.territoryCode || '\u2014';
+  const ruleName = rule.ruleName     || rule.ruleCode     || '\u2014';
+  const terrTitle = rule.territoryCode || '';
+  const ruleTitle = rule.ruleCode     || '';
+  sm.innerHTML=`<span><span class="label">Territory:</span><span title="${esc(terrTitle)}">${esc(terrName)}</span></span><span><span class="label">Rule:</span><span title="${esc(ruleTitle)}">${esc(ruleName)}</span></span><span><span class="label">MixedIDs:</span><span class="mono" style="color:var(--accent)">${rule.overlapCount.toLocaleString()}</span></span><span><span class="label">Parent Accts:</span><span class="mono">${(rule.parentAcctCount||0).toLocaleString()}</span></span><span><span class="label">Accounts:</span><span class="mono">${(rule.acctCount||0).toLocaleString()}</span></span>`;
   const mixBtn = document.getElementById('exportMixedBtn');
   mixBtn.onclick = () => exportAllSharedMixedIds(rule);
   const byR={};
@@ -2717,9 +2721,29 @@ function renderRight(rule) {
     const subTr = document.createElement('tr'); subTr.classList.add('sub-row'); subTr.style.display='none'; subTr.dataset.subIdx=ri;
     const subTd = document.createElement('td'); subTd.colSpan=8;
     const cap = Math.min(r.sharedRecords.length, 100);
-    const subCols = hasSrb ? 6 : 5;
-    let subHtml='<table class="sub-table"><thead><tr><th>MixedID</th><th>Parent Account Name</th><th>Account Name</th>'+(hasSrb?'<th class="num">SRB $</th>':'')+'<th>Job Type</th><th>Sales Team</th></tr></thead><tbody>';
-    for (let si=0;si<cap;si++){const sr=r.sharedRecords[si]; subHtml+=`<tr><td class="mono">${sr.mixedId}</td><td>${sr.parentName||sr.parentAcct||'—'}</td><td>${sr.acctName||sr.acctId||'—'}</td>`+(hasSrb?`<td class="num srb">$${fmt(sr.srb||0)}</td>`:'')+`<td>${sr.jobType||'—'}</td><td>${sr.salesTeam||'—'}</td></tr>`;}
+    /* Column count for the "Showing 100 of N" footer colspan. Matches the
+       header below: MixedID | ParentAcctName | ParentAcctID | AcctName |
+       AcctID | (SRB $ if present) | Job Type. */
+    const subCols = hasSrb ? 7 : 6;
+    let subHtml='<table class="sub-table"><thead><tr>'
+      +'<th>MixedID</th>'
+      +'<th>Parent Account Name</th><th>Parent Account ID</th>'
+      +'<th>Account Name</th><th>Account ID</th>'
+      +(hasSrb?'<th class="num">SRB $</th>':'')
+      +'<th>Job Type</th>'
+      +'</tr></thead><tbody>';
+    for (let si=0;si<cap;si++){
+      const sr=r.sharedRecords[si];
+      subHtml+=`<tr>`
+        +`<td class="mono">${sr.mixedId}</td>`
+        +`<td>${sr.parentName||'—'}</td>`
+        +`<td class="mono">${sr.parentAcct||'—'}</td>`
+        +`<td>${sr.acctName||'—'}</td>`
+        +`<td class="mono">${sr.acctId||'—'}</td>`
+        +(hasSrb?`<td class="num srb">$${fmt(sr.srb||0)}</td>`:'')
+        +`<td>${sr.jobType||'—'}</td>`
+        +`</tr>`;
+    }
     if (r.sharedRecords.length > 100) subHtml+=`<tr><td colspan="${subCols}" style="color:var(--text-muted);font-style:italic;text-align:center;">Showing 100 of ${r.sharedRecords.length.toLocaleString()}. <a href="#" class="sub-export-link" data-ridx="${ri}" style="color:var(--accent);">Export all</a></td></tr>`;
     subHtml+='</tbody></table>';
     subTd.innerHTML=subHtml; subTr.appendChild(subTd); fr.appendChild(subTr);
@@ -4011,11 +4035,21 @@ csRunBtn.addEventListener('click', () => {
 
       // Auto-populate Overlap Report from bulk results
       try {
+        let ruleRowsCs = 0;
         if (csSharedRulesData) {
           const rH = csSharedRulesData[0], rR = csSharedRulesData.slice(1).filter(r => r.some(c => c.trim()));
           RULES = parseRules(rR, rH);
+          ruleRowsCs = rR.length;
         }
         const overlapTerritories = computeOverlapsFromCoinSort(csResults);
+        /* Coin Sort feeds the Overlap Report with synthesized (MixedID,
+           RuleCode) rows. "Rule records processed" stays true to its
+           definition: rows in the Rules Summary file when provided, 0
+           otherwise. MixedID assignments = the Coin-Sort result rows. */
+        INGEST_COUNTS = {
+          rulesIngested: ruleRowsCs,
+          mixedIdRowsIngested: csResults.length
+        };
         launchApp(overlapTerritories);
       } catch (oe) { console.warn('Overlap auto-compute failed:', oe); }
     } catch (e) {
@@ -4054,7 +4088,7 @@ document.getElementById('csExportBtn').addEventListener('click', () => {
 /* =============================================================================
    PART 2 — State-of-the-art UX: severity, insights, chips, visualizations,
             command palette, saved views, watchlist, multi-compare, URL state,
-            theme/density, motion, a11y, shortcuts, print, exec summary.
+            density, motion, a11y, shortcuts, print, exec summary.
    ============================================================================= */
 
 /* ---------- A11y live region helper ---------- */
@@ -4065,23 +4099,8 @@ function announce(msg) {
   setTimeout(() => { r.textContent = msg; }, 40);
 }
 
-/* ---------- Number tween for KPI cards ---------- */
-function tweenNumber(elId, target, formatter) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  const start = parseFloat((el.dataset.v || '0')) || 0;
-  const dur = 380;
-  const t0 = performance.now();
-  const step = (now) => {
-    const p = Math.min(1, (now - t0) / dur);
-    const ease = 1 - Math.pow(1 - p, 3);
-    const v = start + (target - start) * ease;
-    el.textContent = formatter(v);
-    if (p < 1) requestAnimationFrame(step);
-    else { el.dataset.v = String(target); el.textContent = formatter(target); }
-  };
-  requestAnimationFrame(step);
-}
+/* (tweenNumber helper removed along with the KPI cards — nothing else in
+   the app animates a count, so there are no remaining callers.) */
 
 /* ---------- Severity scoring ----------
    score = 0.5*srbNorm + 0.3*mixedNorm + 0.2*rulesNorm  (all normalized 0..1)
@@ -4256,19 +4275,98 @@ function sevColor(key) {
 
 /* ---------- (Chord & Treemap views removed) ---------- */
 
-/* ---------- MATRIX (rule × rule heatmap) ---------- */
+/* ---------- MATRIX (rule × rule heatmap) ----------
+   Layout is derived from the LIVE holder size rather than fixed pixels, so
+   the matrix fills whatever pane it is given instead of centering a small
+   740px SVG inside huge margins. Labels now carry a real gutter budget
+   (Territory Name - Rule Name strings are long), with a native SVG <title>
+   fallback for the rare case a label is still wider than the gutter.
+   Re-renders on window resize while this view is active (see handler below). */
 function renderMatrix() {
   const holder = document.getElementById('matrixSvgHolder');
   holder.innerHTML = '';
-  if (!filtered.length) { holder.innerHTML = '<div class="viz-empty">No rules to display.</div>'; return; }
-  const N = Math.min(40, filtered.length);
-  const nodes = filtered.slice().sort((a,b)=>(b._sevScore||0)-(a._sevScore||0)).slice(0, N);
-  const idx = new Map(nodes.map((n,i)=>[n.ruleCode,i]));
-  const cell = 14, leftPad = 160, topPad = 160;
-  const W = leftPad + N*cell + 20, H = topPad + N*cell + 20;
-  const mat = Array.from({length:N},()=>new Array(N).fill(0));
+  if (!filtered.length) {
+    holder.innerHTML = '<div class="viz-empty">No rules to display.</div>';
+    _updateMatrixSub(0);
+    return;
+  }
+
+  /* Rank first so any cap keeps the most severe rules. */
+  const ranked = filtered.slice().sort((a,b)=>(b._sevScore||0)-(a._sevScore||0));
+
+  /* Measure the pane. Fallback if the holder is briefly 0-sized during a
+     rapid view switch / layout flush. */
+  const rect = holder.getBoundingClientRect();
+  const availW = Math.max(600, rect.width  || 0);
+  const availH = Math.max(400, rect.height || 0);
+
+  /* Sizing envelope.
+       MIN_CELL  — readability floor (below this, cells look like a bar code)
+       MAX_CELL  — growth ceiling on wide monitors
+       MAX_RULES — O(N^2) label + cell cap so render stays snappy
+  */
+  const MIN_CELL = 12;
+  const MAX_CELL = 30;
+  const MAX_RULES = 60;
+
+  /* Column labels are rotated -55°. They extend up-and-to-the-right from
+     each column's top-of-cell anchor, so the rightmost label OVERHANGS the
+     right edge of the grid (this is the other half of the "names cutting
+     off" complaint — the old code never budgeted for this overhang and
+     right-side column labels got clipped against the SVG viewBox). */
+  const ROT_DEG = 55;
+  const rad  = ROT_DEG * Math.PI / 180;
+  const cosR = Math.cos(rad);   // ~0.574 — horizontal projection of a rotated label
+  const sinR = Math.sin(rad);   // ~0.819 — vertical projection
+
+  /* Label gutter budget — asymmetric on purpose. leftPad (row labels) is
+     driven by available WIDTH; topPad (rotated column labels) is driven by
+     available HEIGHT. A short/wide pane would otherwise burn most of its
+     vertical space on rotated labels and leave no room for cells. Both
+     are clamped so tiny panes still get a working matrix and huge panes
+     don't squander everything on text. */
+  const leftPad = Math.round(Math.min(360, Math.max(180, availW * 0.38)));
+  const topPad  = Math.round(Math.min(360, Math.max(180, availH * 0.38)));
+
+  /* How many label chars fit along each axis. Row labels fit HORIZONTALLY
+     within leftPad. Col labels fit DIAGONALLY, so their vertical projection
+     (L*sinR) must fit within topPad. The tighter of the two drives the
+     truncation cap since both orientations render the same label string. */
+  const baseFontPx = 10;
+  const baseCharPx = baseFontPx * 0.58;
+  const rowCharFit = Math.floor((leftPad - 12) / baseCharPx);
+  const colCharFit = Math.floor((topPad  - 10) / (baseCharPx * sinR));
+  const maxLabelChars = Math.max(28, Math.min(72, rowCharFit, colCharFit));
+
+  /* Reserve right-side margin for the rightmost col labels' horizontal
+     overhang so they don't clip against the SVG edge. */
+  const overhangPx = Math.ceil(maxLabelChars * baseCharPx * cosR) + 8;
+
+  /* Pick the largest N that fits at MIN_CELL, budgeting the overhang. */
+  const usableW = availW - leftPad - overhangPx;
+  const usableH = availH - topPad  - 20;
+  const nFit = Math.floor(Math.min(usableW, usableH) / MIN_CELL);
+  const N = Math.max(5, Math.min(MAX_RULES, ranked.length, nFit));
+  const nodes = ranked.slice(0, N);
+  const idx = new Map(nodes.map((n,i)=>[n.ruleCode, i]));
+
+  /* Grow cell size up to MAX_CELL so the grid fills the pane when it can. */
+  const cell = Math.max(MIN_CELL, Math.min(
+    MAX_CELL,
+    Math.floor(Math.min(usableW, usableH) / N)
+  ));
+
+  /* Final label font tracks cell size (bigger cells → slightly bigger
+     labels), floored so text never falls below 10px. */
+  const labelFontPx = Math.max(10, Math.min(13, Math.round(cell * 0.70)));
+
+  const W = leftPad + N*cell + overhangPx;
+  const H = topPad  + N*cell + 20;
+
+  /* Build the shared-MixedID matrix. */
+  const mat = Array.from({length:N}, ()=>new Array(N).fill(0));
   let maxV = 1;
-  for (let i=0;i<N;i++) {
+  for (let i=0; i<N; i++) {
     const byR = {};
     for (const r of nodes[i].records) for (const or of r.overlappingRules) {
       if (!idx.has(or)) continue;
@@ -4278,55 +4376,105 @@ function renderMatrix() {
     }
     for (const j in byR) { mat[i][+j] = byR[j].size; if (byR[j].size > maxV) maxV = byR[j].size; }
   }
-  for (let i=0;i<N;i++) for (let j=i+1;j<N;j++) { const v = Math.max(mat[i][j], mat[j][i]); mat[i][j] = mat[j][i] = v; }
+  for (let i=0; i<N; i++) for (let j=i+1; j<N; j++) {
+    const v = Math.max(mat[i][j], mat[j][i]);
+    mat[i][j] = mat[j][i] = v;
+  }
+
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns,'svg');
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('width',W); svg.setAttribute('height',H);
-  // Row / col labels
-  for (let i=0;i<N;i++) {
-    const rn = rlbl(nodes[i]).toString();
-    const shown = rn.length > 30 ? rn.slice(0,28)+'…' : rn;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width',  W);
+  svg.setAttribute('height', H);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+  /* Row (left) + column (rotated top) labels. Each gets a native SVG
+     <title> carrying the FULL un-truncated label so hover always surfaces
+     the complete Territory - Rule string, even if the visible label hit
+     the truncation cap. */
+  for (let i=0; i<N; i++) {
+    const full  = rlbl(nodes[i]).toString();
+    const shown = full.length > maxLabelChars ? full.slice(0, maxLabelChars - 1) + '\u2026' : full;
+
     const tr = document.createElementNS(ns,'text');
-    tr.setAttribute('x', leftPad-6); tr.setAttribute('y', topPad + i*cell + cell*0.72);
-    tr.setAttribute('text-anchor','end'); tr.setAttribute('class','matrix-label');
+    tr.setAttribute('x', leftPad - 6);
+    tr.setAttribute('y', topPad + i*cell + cell*0.72);
+    tr.setAttribute('text-anchor','end');
+    tr.setAttribute('class','matrix-label');
+    tr.style.fontSize = labelFontPx + 'px';
     tr.textContent = shown;
+    const tt1 = document.createElementNS(ns,'title'); tt1.textContent = full; tr.appendChild(tt1);
     svg.appendChild(tr);
+
+    const cx = leftPad + i*cell + cell*0.6;
     const tc = document.createElementNS(ns,'text');
-    tc.setAttribute('x', leftPad + i*cell + cell*0.6); tc.setAttribute('y', topPad - 6);
-    tc.setAttribute('transform', `rotate(-55, ${leftPad+i*cell+cell*0.6}, ${topPad-6})`);
+    tc.setAttribute('x', cx);
+    tc.setAttribute('y', topPad - 6);
+    tc.setAttribute('transform', `rotate(-55, ${cx}, ${topPad-6})`);
     tc.setAttribute('class','matrix-label');
+    tc.style.fontSize = labelFontPx + 'px';
     tc.textContent = shown;
+    const tt2 = document.createElementNS(ns,'title'); tt2.textContent = full; tc.appendChild(tt2);
     svg.appendChild(tc);
   }
-  // Cells
-  for (let i=0;i<N;i++) for (let j=0;j<N;j++) {
+
+  /* Cells. */
+  for (let i=0; i<N; i++) for (let j=0; j<N; j++) {
     const v = mat[i][j];
     if (i === j || v === 0) continue;
-    const rect = document.createElementNS(ns,'rect');
-    rect.setAttribute('x', leftPad+j*cell); rect.setAttribute('y', topPad+i*cell);
-    rect.setAttribute('width', cell-1); rect.setAttribute('height', cell-1);
+    const rectEl = document.createElementNS(ns,'rect');
+    rectEl.setAttribute('x', leftPad + j*cell);
+    rectEl.setAttribute('y', topPad  + i*cell);
+    rectEl.setAttribute('width',  cell - 1);
+    rectEl.setAttribute('height', cell - 1);
     const norm = v / maxV;
     const sev = norm >= 0.65 ? 'crit' : norm >= 0.4 ? 'high' : norm >= 0.18 ? 'med' : 'low';
-    rect.setAttribute('fill', sevColor(sev));
-    rect.setAttribute('opacity', 0.25 + 0.7*norm);
-    rect.classList.add('matrix-cell');
-    rect.addEventListener('mouseenter', e => {
+    rectEl.setAttribute('fill', sevColor(sev));
+    rectEl.setAttribute('opacity', 0.25 + 0.7 * norm);
+    rectEl.classList.add('matrix-cell');
+    rectEl.addEventListener('mouseenter', e => {
       showTip(e, `<strong>${rlbl(nodes[i])}</strong><span style="color:var(--text-muted)">\u2194 ${rlbl(nodes[j])}</span><br>Shared MixedIDs: <b>${v.toLocaleString()}</b>`);
     });
-    rect.addEventListener('mousemove', positionTip);
-    rect.addEventListener('mouseleave', hideTip);
-    rect.addEventListener('click', () => openModal(nodes[i].territoryCode, nodes[j].territoryCode, nodes[i].ruleCode, nodes[j].ruleCode));
-    svg.appendChild(rect);
+    rectEl.addEventListener('mousemove', positionTip);
+    rectEl.addEventListener('mouseleave', hideTip);
+    rectEl.addEventListener('click', () => openModal(nodes[i].territoryCode, nodes[j].territoryCode, nodes[i].ruleCode, nodes[j].ruleCode));
+    svg.appendChild(rectEl);
   }
   holder.appendChild(svg);
+
+  _updateMatrixSub(N, ranked.length);
 }
+
+/* Keeps the title sub-line honest about how many rules are actually on
+   screen (it used to hardcode "top 40" which became wrong once N went
+   dynamic). */
+function _updateMatrixSub(n, total) {
+  const sub = document.getElementById('matrixSub');
+  if (!sub) return;
+  if (!n) { sub.textContent = '\u2014 no rules to display.'; return; }
+  const scope = (total && total > n) ? `top ${n} of ${total} rules` : `${n} rule${n === 1 ? '' : 's'}`;
+  sub.textContent = `\u2014 ${scope} by severity. Cell intensity = shared MixedIDs.`;
+}
+
+/* Re-render the matrix on window resize so labels / cell size / rule count
+   track the new viewport. Debounced, and skipped when the matrix pane is
+   not the active view. */
+(function installMatrixResizeHandler() {
+  let t = null;
+  window.addEventListener('resize', () => {
+    if (CURRENT_VIEW !== 'matrix') return;
+    clearTimeout(t);
+    t = setTimeout(() => { renderMatrix(); }, 120);
+  });
+})();
 
 /* ---------- COUNTRY HEAT MAP ----------
    Renders overlap intensity on an embedded world map SVG as earthquake-style
    bubbles placed at each country's centroid. A raw country string from the
    source CSV (ISO2 code, ISO3 code, or English name) is resolved to the SVG's
    ISO 3166-1 alpha-2 path ID via COUNTRY_ALIASES. Values that don't resolve
-   are surfaced in a "Not on map" chip list so the user knows nothing was lost.
+   are logged to the console so nothing is lost silently (the earlier on-map
+   "Not on map" chip strip was removed as visual noise).
    ------------------------------------------------------------------------- */
 
 /* Canonical name per ISO2 (used as the display label when multiple raw values
@@ -4536,8 +4684,9 @@ function resolveCountryCode(raw) {
 function aggregateByCountry(dataset) {
   /* Bucket records by resolved ISO2 so two raw forms of the same country
      (e.g. "USA" and "United States") collapse onto a single map bubble.
-     Unresolved values still aggregate under an "unk:<raw>" key so they can
-     be surfaced to the user as "Not on map" chips. */
+     Unresolved values still aggregate under an "unk:<raw>" key so they show
+     up as a diagnostic group in the console log, rather than being silently
+     merged with resolved countries. */
   const byCountry = new Map();
   for (const t of dataset) {
     for (const r of t.records) {
@@ -4592,23 +4741,216 @@ function _paintCountryEmpty(mapWrap, msg, sub) {
   mapWrap.appendChild(div);
 }
 
-function _paintUnknownList(el, unk) {
-  if (!unk.length) { el.hidden = true; el.innerHTML = ''; return; }
-  el.hidden = false;
-  const chips = unk.slice(0, 40).map(c => {
-    const title = `${c.rules.toLocaleString()} rules \u00B7 ${c.mixed.toLocaleString()} MixedIDs`;
-    return `<span class="cu-chip" title="${title}">${c.name}</span>`;
-  }).join('');
-  const more = unk.length > 40 ? ` <span style="color:var(--text-subtle)">+${unk.length - 40} more</span>` : '';
-  el.innerHTML = `<strong>Not on map (${unk.length}):</strong> ${chips}${more}`;
-}
+/* ---------- Country heat-map zoom / pan controller ----------
+   Dense regions (EMEA, SE Asia) pack dozens of small countries into a few
+   hundred SVG pixels, so at full-world zoom the bubbles overlap and the
+   outlines are invisible. This controller wraps the two original groups
+   (.world-countries, .world-bubbles) in a single <g class="zoom-viewport">
+   and transforms that wrapper, so countries AND their bubbles zoom together.
+
+   Interactions:
+     - +/- buttons and reset button in the top-right overlay
+     - Ctrl-less mouse wheel over the map
+     - Click-and-drag to pan (only enabled once zoomed in past 1x)
+
+   Zoom pivoting math: transform is `translate(tx, ty) scale(s)`. A content
+   point (x0, y0) maps to (tx + s*x0, ty + s*y0). To keep a given pivot point
+   fixed in the SVG's own viewBox coordinate space as s changes:
+     newTx = pivot.x - (pivot.x - tx) * (newS / s)
+   (same for y). This is what lets wheel-zoom "home in" on the cursor instead
+   of re-centering every time. */
+const COUNTRY_ZOOM = (() => {
+  const MIN = 1, MAX = 8;
+  const state = { scale: 1, tx: 0, ty: 0 };
+  let svgEl = null;
+  let viewportEl = null;
+  let drag = null;
+
+  function _findSvg() { return document.querySelector('#countryMap svg'); }
+
+  /* Wraps .world-countries + .world-bubbles in a single viewport <g> so a
+     single transform drives the whole map. Idempotent: second call returns
+     the existing wrapper. appendChild reparents rather than clones, so we
+     don't double any event listeners already attached to country paths. */
+  function _ensureViewport() {
+    const svg = _findSvg();
+    if (!svg) return null;
+    svgEl = svg;
+    let vp = svg.querySelector(':scope > g.zoom-viewport');
+    if (!vp) {
+      vp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      vp.setAttribute('class', 'zoom-viewport');
+      const countries = svg.querySelector(':scope > g.world-countries');
+      const bubbles   = svg.querySelector(':scope > g.world-bubbles');
+      if (!countries || !bubbles) return null;
+      svg.appendChild(vp);
+      vp.appendChild(countries);
+      vp.appendChild(bubbles);
+    }
+    viewportEl = vp;
+    return vp;
+  }
+
+  function _apply() {
+    if (!viewportEl && !_ensureViewport()) return;
+    viewportEl.setAttribute('transform',
+      `translate(${state.tx.toFixed(3)} ${state.ty.toFixed(3)}) scale(${state.scale.toFixed(4)})`);
+    if (svgEl) svgEl.classList.toggle('pannable', state.scale > 1.0001);
+    _syncButtons();
+  }
+
+  /* Disable +/- at the clamp boundaries so the button state matches reality. */
+  function _syncButtons() {
+    const plus  = document.getElementById('cZoomIn');
+    const minus = document.getElementById('cZoomOut');
+    const reset = document.getElementById('cZoomReset');
+    if (plus)  plus.disabled  = state.scale >= MAX - 1e-4;
+    if (minus) minus.disabled = state.scale <= MIN + 1e-4;
+    if (reset) reset.disabled = state.scale === 1 && state.tx === 0 && state.ty === 0;
+  }
+
+  /* Clamp pan so the map never drifts completely off-screen. At scale s,
+     the content covers [tx + s*vb.x, tx + s*(vb.x + vb.w)]. We allow a
+     small slack so edges can be scrolled into the middle, but not so much
+     that the map disappears entirely. */
+  function _clampPan() {
+    if (!svgEl || !svgEl.viewBox || !svgEl.viewBox.baseVal) return;
+    const vb = svgEl.viewBox.baseVal;
+    if (!vb.width || !vb.height) return;
+    const slack = 0.25;
+    const minTx = vb.x + vb.width  * (1 - state.scale) - vb.width  * slack;
+    const maxTx = vb.x                                 + vb.width  * slack;
+    const minTy = vb.y + vb.height * (1 - state.scale) - vb.height * slack;
+    const maxTy = vb.y                                 + vb.height * slack;
+    state.tx = Math.min(maxTx, Math.max(minTx, state.tx));
+    state.ty = Math.min(maxTy, Math.max(minTy, state.ty));
+  }
+
+  function _viewportCenterSvg() {
+    if (!svgEl || !svgEl.viewBox.baseVal.width) return { x: 0, y: 0 };
+    const vb = svgEl.viewBox.baseVal;
+    return { x: vb.x + vb.width / 2, y: vb.y + vb.height / 2 };
+  }
+
+  function _clientToSvg(clientX, clientY) {
+    if (!svgEl) return null;
+    const ctm = svgEl.getScreenCTM();
+    if (!ctm) return null;
+    const pt = svgEl.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    const p = pt.matrixTransform(ctm.inverse());
+    return { x: p.x, y: p.y };
+  }
+
+  function zoomBy(factor, pivotX, pivotY) {
+    const oldScale = state.scale;
+    const newScale = Math.max(MIN, Math.min(MAX, oldScale * factor));
+    if (Math.abs(newScale - oldScale) < 1e-6) { _syncButtons(); return; }
+    const k = newScale / oldScale;
+    state.tx = pivotX - (pivotX - state.tx) * k;
+    state.ty = pivotY - (pivotY - state.ty) * k;
+    state.scale = newScale;
+    if (newScale <= MIN + 1e-4) { state.tx = 0; state.ty = 0; }
+    _clampPan();
+    _apply();
+  }
+
+  function zoomIn()  { const c = _viewportCenterSvg(); zoomBy(1.4,   c.x, c.y); }
+  function zoomOut() { const c = _viewportCenterSvg(); zoomBy(1/1.4, c.x, c.y); }
+  function reset()   { state.scale = 1; state.tx = 0; state.ty = 0; _apply(); }
+
+  function _onWheel(e) {
+    if (!svgEl) return;
+    e.preventDefault();
+    const p = _clientToSvg(e.clientX, e.clientY);
+    if (!p) return;
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    zoomBy(factor, p.x, p.y);
+  }
+
+  /* Drag-to-pan is a separate gesture from the country-click-to-filter.
+     Both start on mousedown over the SVG, so we need a "did the user actually
+     pan" flag to distinguish a sloppy click (mousedown -> tiny wiggle ->
+     mouseup on a country) from an intentional pan that happens to end over
+     a country. We only swallow the trailing `click` event when real panning
+     occurred. Only engaged at scale > 1x so a fresh, fully-zoomed-out map
+     behaves like a plain click map. */
+  function _onMouseDown(e) {
+    if (!svgEl || e.button !== 0) return;
+    if (state.scale <= MIN + 1e-4) return;
+    drag = {
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      startTx: state.tx,
+      startTy: state.ty,
+      ctm: svgEl.getScreenCTM(),
+      moved: false
+    };
+    svgEl.classList.add('panning');
+  }
+  function _onMouseMove(e) {
+    if (!drag || !drag.ctm) return;
+    const pxDx = e.clientX - drag.startClientX;
+    const pxDy = e.clientY - drag.startClientY;
+    if (!drag.moved && (Math.abs(pxDx) + Math.abs(pxDy)) > 3) drag.moved = true;
+    if (drag.moved) e.preventDefault();
+    state.tx = drag.startTx + pxDx / drag.ctm.a;
+    state.ty = drag.startTy + pxDy / drag.ctm.d;
+    _clampPan();
+    _apply();
+  }
+  function _onMouseUp() {
+    if (!drag) return;
+    const didPan = !!drag.moved;
+    drag = null;
+    if (svgEl) svgEl.classList.remove('panning');
+    /* If the user actually panned, swallow the pending `click` so we don't
+       filter the grid by whatever country their mouse happened to end on. */
+    if (didPan && svgEl) {
+      const swallow = (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        svgEl.removeEventListener('click', swallow, true);
+      };
+      svgEl.addEventListener('click', swallow, true);
+      setTimeout(() => svgEl.removeEventListener('click', swallow, true), 0);
+    }
+  }
+
+  /* One-time wiring. Safe to call on every renderCountry() — it no-ops on
+     repeat invocations via the dataset flag on the SVG node. */
+  function attach() {
+    const svg = _findSvg();
+    if (!svg) return;
+    _ensureViewport();
+    _apply();
+    if (svg.dataset.czAttached) return;
+    svg.addEventListener('wheel', _onWheel, { passive: false });
+    svg.addEventListener('mousedown', _onMouseDown);
+    window.addEventListener('mousemove', _onMouseMove);
+    window.addEventListener('mouseup', _onMouseUp);
+    svg.dataset.czAttached = '1';
+
+    const bPlus  = document.getElementById('cZoomIn');
+    const bMinus = document.getElementById('cZoomOut');
+    const bReset = document.getElementById('cZoomReset');
+    if (bPlus)  bPlus.addEventListener('click',  zoomIn);
+    if (bMinus) bMinus.addEventListener('click', zoomOut);
+    if (bReset) bReset.addEventListener('click', reset);
+  }
+
+  return { attach, zoomIn, zoomOut, reset };
+})();
 
 function renderCountry() {
   const mapWrap = document.getElementById('countryMap');
   const svg     = mapWrap && mapWrap.querySelector('svg');
   const summary = document.getElementById('countrySummary');
-  const unknown = document.getElementById('countryUnknown');
-  if (!svg || !summary || !unknown) return;
+  if (!svg || !summary) return;
+
+  /* Wrap the two static <g> groups in a zoom viewport on first paint, and
+     wire up the +/-/reset buttons + wheel + drag. Idempotent across calls. */
+  COUNTRY_ZOOM.attach();
 
   summary.textContent = '';
 
@@ -4625,7 +4967,6 @@ function renderCountry() {
   const bubblesG = svg.querySelector('.world-bubbles');
   if (bubblesG) bubblesG.innerHTML = '';
   mapWrap.querySelectorAll('.country-map-empty').forEach(n => n.remove());
-  unknown.hidden = true; unknown.innerHTML = '';
 
   const source = filteredNoCountry && filteredNoCountry.length ? filteredNoCountry : filtered;
   if (!source || !source.length) {
@@ -4710,9 +5051,8 @@ function renderCountry() {
     _paintCountryEmpty(
       mapWrap,
       `None of the ${countries.length.toLocaleString()} country values in the data match a country on the map.`,
-      'Use ISO codes (e.g. <code>US</code>, <code>USA</code>) or English names (e.g. <code>United States</code>). The full list is shown below.'
+      'Use ISO codes (e.g. <code>US</code>, <code>USA</code>) or English names (e.g. <code>United States</code>).'
     );
-    _paintUnknownList(unknown, countries);
     return;
   }
 
@@ -4839,7 +5179,12 @@ function renderCountry() {
     if (selEl) selEl.classList.add('selected');
   }
 
-  _paintUnknownList(unknown, unmapped);
+  /* The old on-screen "Not on map" chip strip was removed; unresolved country
+     values are still logged below so they show up in the F12 console for QA. */
+  if (unmapped.length) {
+    console.info('[overlap] heatmap: ' + unmapped.length + ' country value(s) not on map:',
+      unmapped.map(c => c.name));
+  }
 
   /* Validation pass: flag any pair of bubbles whose centers are closer than
      the sum of their core radii so the user can spot placement collisions
@@ -5119,7 +5464,6 @@ function buildPaletteItems(q) {
     { t:'Export Overlap (rules in main grid)',    g:'Actions', icon:'\u21E9', kb:'', do:()=>exportAll() },
     { t:'Export Details (MixedID level)',         g:'Actions', icon:'\u21E9', kb:'', do:()=>exportDetail() },
     { t:'Save current view',      g:'Actions', icon:'\u2B50', kb:'',   do:()=>saveCurrentView() },
-    { t:'Toggle theme',           g:'Settings',icon:'\u263D', kb:'Shift+D', do:()=>cycleTheme() },
     { t:'Toggle density',         g:'Settings',icon:'\u2261', kb:'Shift+E', do:()=>cycleDensity() },
     { t:'Keyboard shortcuts',     g:'Help',    icon:'?',      kb:'?',  do:()=>document.getElementById('shortcutsOverlay').classList.add('open') }
   ];
@@ -5182,26 +5526,9 @@ function syncPaletteSel() {
 paletteOverlay.addEventListener('click', e => { if (e.target === paletteOverlay) closePalette(); });
 document.getElementById('paletteBtn').addEventListener('click', openPalette);
 
-/* ---------- THEME / DENSITY ---------- */
+/* ---------- DENSITY ---------- */
 function getPref(k, d) { try { return localStorage.getItem(k) || d; } catch { return d; } }
 function setPref(k, v) { try { localStorage.setItem(k, v); } catch {} }
-function applyTheme(mode) {
-  if (mode === 'system') {
-    const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-  } else {
-    document.documentElement.setAttribute('data-theme', mode);
-  }
-  setPref('ovTheme', mode);
-  // Re-render any viz that uses computed CSS colors
-  if (CURRENT_VIEW !== 'grid') renderCurrentViz();
-}
-function cycleTheme() {
-  const cur = getPref('ovTheme','light');
-  const next = cur === 'light' ? 'dark' : cur === 'dark' ? 'system' : 'light';
-  applyTheme(next);
-  announce('Theme: ' + next);
-}
 function applyDensity(d) { document.documentElement.setAttribute('data-density', d); setPref('ovDensity', d); }
 function cycleDensity() {
   const cur = getPref('ovDensity','cozy');
@@ -5209,13 +5536,8 @@ function cycleDensity() {
   applyDensity(next);
   announce('Density: ' + next);
 }
-document.getElementById('themeBtn').addEventListener('click', cycleTheme);
 document.getElementById('densityBtn').addEventListener('click', cycleDensity);
-applyTheme(getPref('ovTheme','light'));
 applyDensity(getPref('ovDensity','cozy'));
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  if (getPref('ovTheme','light') === 'system') applyTheme('system');
-});
 
 /* ---------- SHORTCUTS modal ---------- */
 document.getElementById('shortcutsBtn').addEventListener('click', () => document.getElementById('shortcutsOverlay').classList.add('open'));
@@ -5231,7 +5553,6 @@ document.addEventListener('keydown', e => {
   if (isInput && e.key !== 'Escape') return;
   if (e.key === '?' || (e.shiftKey && e.key === '/')) { e.preventDefault(); document.getElementById('shortcutsOverlay').classList.add('open'); }
   else if (e.key === '/') { e.preventDefault(); document.getElementById('searchInput').focus(); }
-  else if (e.shiftKey && (e.key === 'D' || e.key === 'd')) { e.preventDefault(); cycleTheme(); }
   else if (e.shiftKey && (e.key === 'E' || e.key === 'e')) { e.preventDefault(); cycleDensity(); }
   else if (!e.shiftKey && (e.key === 'g' || e.key === 'G') && DATA.length) { switchView('grid'); }
   else if (!e.shiftKey && (e.key === 'm' || e.key === 'M') && DATA.length) { switchView('matrix'); }
