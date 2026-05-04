@@ -551,6 +551,15 @@
   /* ---- Detail drawer ---- */
   .drawer-wrap { flex-shrink: 0; overflow: hidden; border-top: 2px solid var(--accent); transition: height .25s ease; height: 0; display: flex; flex-direction: column; }
   .drawer-wrap.open { height: 40vh; }
+  /* Stack above .compare-bar (z-index:150) so the resize strip, title row, and
+     close control stay clickable after the drawer height changes. */
+  .drawer-wrap.open .drawer-resize,
+  .drawer-wrap.open .drawer-header,
+  .drawer-wrap.open .drawer-summary {
+    position: relative;
+    z-index: 160;
+  }
+  .drawer-wrap.open .drawer-resize { z-index: 161; }
   .drawer-header { padding: 5px 12px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); background: var(--surface-hover); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .drawer-header .count { font-family: var(--mono); color: var(--accent); font-size: 11px; background: var(--accent-dim); padding: 1px 6px; border-radius: 10px; }
   .drawer-header .close-drawer { margin-left: auto; background: none; border: 1px solid var(--border); border-radius: 3px; cursor: pointer; padding: 1px 6px; font-size: 13px; line-height: 1; color: var(--text-muted); transition: all .15s; }
@@ -614,7 +623,7 @@
   }
 
   /* ---- Drawer resize handle ---- */
-  .drawer-resize { height: 4px; background: var(--border); cursor: ns-resize; flex-shrink: 0; transition: background .15s; }
+  .drawer-resize { height: 4px; background: var(--border); cursor: ns-resize; flex-shrink: 0; transition: background .15s; touch-action: none; }
   .drawer-resize:hover { background: var(--accent); }
 
   /* ---- Modal ---- */
@@ -1014,6 +1023,12 @@
     width: 100%; height: 100%;
     max-height: calc(100vh - 260px);
     display: block;
+  }
+  /* Full viewBox rect behind countries so ocean / padding still receives
+     mousedown for pan (SVG hit-testing only paints paths by default). */
+  .country-map .zoom-hit-surface {
+    pointer-events: all;
+    stroke: none;
   }
   .country-map .world-countries path {
     fill: var(--surface-raised);
@@ -1552,7 +1567,7 @@
   <div class="view-pane" id="viewMatrix">
     <div class="viz-container">
       <div class="viz-title">Bilateral rule × rule heatmap <span id="matrixSub" style="color:var(--text-subtle);font-weight:400;text-transform:none;letter-spacing:0;">&mdash; ranked by severity. Cell intensity = shared MixedIDs.</span>
-        <div class="matrix-legend" style="display:inline-flex;"><span>Low</span><div class="grad"></div><span>High</span></div>
+        <div class="matrix-legend" style="display:inline-flex;"><span id="matrixLegendMin">0</span><div class="grad"></div><span id="matrixLegendMax">0</span></div>
       </div>
       <div id="matrixSvgHolder" style="flex:1;position:relative;min-height:0;overflow:auto;"></div>
     </div>
@@ -1570,7 +1585,7 @@
           <button class="chip country-metric" data-cmetric="srb" title="Color by deduped overlapped SRB $">SRB $</button>
           <button class="chip country-metric" data-cmetric="rules" title="Color by overlapped rules touching this country">Rules</button>
         </div>
-        <div class="matrix-legend country-legend"><span>Low</span><div class="grad"></div><span>High</span></div>
+        <div class="matrix-legend country-legend"><span id="countryLegendMin">0</span><div class="grad"></div><span id="countryLegendMax">0</span></div>
       </div>
       <div id="countryMap" class="country-map" role="region" aria-label="World overlap heat map">
         <!-- Floating zoom controls overlaid on the map's top-right. The SVG
@@ -1593,7 +1608,7 @@
     <div class="drawer-header">
       <span>Overlap Detail</span> <span class="count" id="rightCount">0</span>
       <button class="export-btn" id="exportMixedBtn" style="margin-left:8px;">Export Shared MixedIDs</button>
-      <button class="close-drawer" id="closeDrawer" title="Close">&times;</button>
+      <button type="button" class="close-drawer" id="closeDrawer" title="Close">&times;</button>
     </div>
     <div class="drawer-summary" id="drawerSummary"></div>
     <div class="drawer-grid">
@@ -2709,7 +2724,9 @@ function openDrawer(rule) {
   renderRight(rule);
 }
 function closeDrawer() {
-  document.getElementById('drawerWrap').classList.remove('open');
+  const dw = document.getElementById('drawerWrap');
+  dw.classList.remove('open');
+  dw.style.height = '';
   selectedRuleIdx=-1;
   document.querySelectorAll('.left-table tbody tr').forEach(tr=>tr.classList.remove('active'));
 }
@@ -3311,17 +3328,32 @@ function exportAllSharedMixedIds(rule) {
 /* ===== Drawer resize ===== */
 {
   const rs=document.getElementById('drawerResize'), dw=document.getElementById('drawerWrap');
-  let sy, sh;
-  rs.addEventListener('mousedown', e => {
-    sy=e.clientY; sh=dw.offsetHeight;
-    document.addEventListener('mousemove', mv);
-    document.addEventListener('mouseup', ()=>document.removeEventListener('mousemove', mv), {once:true});
-  });
+  let sy, sh, dragging=false;
   function mv(e) {
+    if (!dragging) return;
     const h = sh + (sy - e.clientY);
     const pct = (h / window.innerHeight) * 100;
     if (pct > 15 && pct < 75) dw.style.height = pct + 'vh';
   }
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    document.removeEventListener('mousemove', mv);
+    document.removeEventListener('mouseup', endDrag);
+    window.removeEventListener('blur', endDrag);
+    document.body.style.userSelect = '';
+  }
+  rs.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    dragging = true;
+    sy = e.clientY;
+    sh = dw.offsetHeight;
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', endDrag);
+    window.addEventListener('blur', endDrag);
+  });
 }
 
 /* ===== Tab Switching =====
@@ -4369,6 +4401,10 @@ function renderMatrix() {
   if (!filtered.length) {
     holder.innerHTML = '<div class="viz-empty">No rules to display.</div>';
     _updateMatrixSub(0);
+    const mLo = document.getElementById('matrixLegendMin');
+    const mHi = document.getElementById('matrixLegendMax');
+    if (mLo) mLo.textContent = '0';
+    if (mHi) mHi.textContent = '\u2014';
     return;
   }
 
@@ -4386,8 +4422,9 @@ function renderMatrix() {
        MAX_CELL  — growth ceiling on wide monitors
        MAX_RULES — O(N^2) label + cell cap so render stays snappy
   */
-  const MIN_CELL = 12;
-  const MAX_CELL = 30;
+  const M_VIS = 0.8;
+  const MIN_CELL = Math.max(9, Math.round(12 * M_VIS));
+  const MAX_CELL = Math.round(30 * M_VIS);
   const MAX_RULES = 60;
 
   /* Column labels are rotated -55°. They extend up-and-to-the-right from
@@ -4406,14 +4443,14 @@ function renderMatrix() {
      vertical space on rotated labels and leave no room for cells. Both
      are clamped so tiny panes still get a working matrix and huge panes
      don't squander everything on text. */
-  const leftPad = Math.round(Math.min(360, Math.max(180, availW * 0.38)));
-  const topPad  = Math.round(Math.min(360, Math.max(180, availH * 0.38)));
+  const leftPad = Math.round(Math.min(360, Math.max(180, availW * 0.38)) * M_VIS);
+  const topPad  = Math.round(Math.min(360, Math.max(180, availH * 0.38)) * M_VIS);
 
   /* How many label chars fit along each axis. Row labels fit HORIZONTALLY
      within leftPad. Col labels fit DIAGONALLY, so their vertical projection
      (L*sinR) must fit within topPad. The tighter of the two drives the
      truncation cap since both orientations render the same label string. */
-  const baseFontPx = 10;
+  const baseFontPx = 10 * M_VIS;
   const baseCharPx = baseFontPx * 0.58;
   const rowCharFit = Math.floor((leftPad - 12) / baseCharPx);
   const colCharFit = Math.floor((topPad  - 10) / (baseCharPx * sinR));
@@ -4565,6 +4602,10 @@ function renderMatrix() {
   for (const { node, body, truncated } of colLabels) trimToFit(node, body, truncated, colBudget);
 
   _updateMatrixSub(N, ranked.length);
+  const mLo = document.getElementById('matrixLegendMin');
+  const mHi = document.getElementById('matrixLegendMax');
+  if (mLo) mLo.textContent = '0';
+  if (mHi) mHi.textContent = maxV.toLocaleString();
 }
 
 /* Keeps the title sub-line honest about how many rules are actually on
@@ -4873,7 +4914,7 @@ function _paintCountryEmpty(mapWrap, msg, sub) {
    Interactions:
      - +/- buttons and reset button in the top-right overlay
      - Ctrl-less mouse wheel over the map
-     - Click-and-drag to pan (only enabled once zoomed in past 1x)
+     - Click-and-drag to pan (also at 1x to reposition the world view)
 
    Zoom pivoting math: transform is `translate(tx, ty) scale(s)`. A content
    point (x0, y0) maps to (tx + s*x0, ty + s*y0). To keep a given pivot point
@@ -4898,16 +4939,42 @@ const COUNTRY_ZOOM = (() => {
     const svg = _findSvg();
     if (!svg) return null;
     svgEl = svg;
+    const ns = 'http://www.w3.org/2000/svg';
     let vp = svg.querySelector(':scope > g.zoom-viewport');
     if (!vp) {
-      vp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      vp = document.createElementNS(ns, 'g');
       vp.setAttribute('class', 'zoom-viewport');
       const countries = svg.querySelector(':scope > g.world-countries');
       const bubbles   = svg.querySelector(':scope > g.world-bubbles');
       if (!countries || !bubbles) return null;
       svg.appendChild(vp);
+      const vb = svg.viewBox && svg.viewBox.baseVal;
+      if (vb && vb.width && vb.height) {
+        const hit = document.createElementNS(ns, 'rect');
+        hit.setAttribute('class', 'zoom-hit-surface');
+        hit.setAttribute('x', String(vb.x));
+        hit.setAttribute('y', String(vb.y));
+        hit.setAttribute('width', String(vb.width));
+        hit.setAttribute('height', String(vb.height));
+        hit.setAttribute('fill', 'transparent');
+        hit.setAttribute('pointer-events', 'all');
+        vp.appendChild(hit);
+      }
       vp.appendChild(countries);
       vp.appendChild(bubbles);
+    } else if (!vp.querySelector('rect.zoom-hit-surface')) {
+      const vb = svg.viewBox && svg.viewBox.baseVal;
+      if (vb && vb.width && vb.height) {
+        const hit = document.createElementNS(ns, 'rect');
+        hit.setAttribute('class', 'zoom-hit-surface');
+        hit.setAttribute('x', String(vb.x));
+        hit.setAttribute('y', String(vb.y));
+        hit.setAttribute('width', String(vb.width));
+        hit.setAttribute('height', String(vb.height));
+        hit.setAttribute('fill', 'transparent');
+        hit.setAttribute('pointer-events', 'all');
+        vp.insertBefore(hit, vp.firstChild);
+      }
     }
     viewportEl = vp;
     return vp;
@@ -4917,7 +4984,7 @@ const COUNTRY_ZOOM = (() => {
     if (!viewportEl && !_ensureViewport()) return;
     viewportEl.setAttribute('transform',
       `translate(${state.tx.toFixed(3)} ${state.ty.toFixed(3)}) scale(${state.scale.toFixed(4)})`);
-    if (svgEl) svgEl.classList.toggle('pannable', state.scale > 1.0001);
+    if (svgEl) svgEl.classList.add('pannable');
     _syncButtons();
   }
 
@@ -4931,21 +4998,28 @@ const COUNTRY_ZOOM = (() => {
     if (reset) reset.disabled = state.scale === 1 && state.tx === 0 && state.ty === 0;
   }
 
-  /* Clamp pan so the map never drifts completely off-screen. At scale s,
-     the content covers [tx + s*vb.x, tx + s*(vb.x + vb.w)]. We allow a
-     small slack so edges can be scrolled into the middle, but not so much
-     that the map disappears entirely. */
+  /* Clamp pan so the map never drifts completely off-screen.
+     Content is authored in the same space as the viewBox; with transform
+     `translate(tx,ty) scale(s)`, corner (vb.x, vb.y) maps to
+     (tx + s*vb.x, ty + s*vb.y). At higher zoom the legal interval is:
+       left content edge can move up to +slack into the viewport, and
+       right content edge must stay at least -slack inside the viewport.
+     Keep the low/high formulas ordered; swapping them collapses panning
+     once scale exceeds roughly 1.5x. */
   function _clampPan() {
     if (!svgEl || !svgEl.viewBox || !svgEl.viewBox.baseVal) return;
     const vb = svgEl.viewBox.baseVal;
     if (!vb.width || !vb.height) return;
     const slack = 0.25;
-    const minTx = vb.x + vb.width  * (1 - state.scale) - vb.width  * slack;
-    const maxTx = vb.x                                 + vb.width  * slack;
-    const minTy = vb.y + vb.height * (1 - state.scale) - vb.height * slack;
-    const maxTy = vb.y                                 + vb.height * slack;
+    const s = state.scale;
+    const minTx = (vb.x + vb.width) * (1 - s) - vb.width * slack;
+    const maxTx = vb.x * (1 - s) + vb.width * slack;
+    const minTy = (vb.y + vb.height) * (1 - s) - vb.height * slack;
+    const maxTy = vb.y * (1 - s) + vb.height * slack;
     state.tx = Math.min(maxTx, Math.max(minTx, state.tx));
     state.ty = Math.min(maxTy, Math.max(minTy, state.ty));
+    if (!Number.isFinite(state.tx)) state.tx = 0;
+    if (!Number.isFinite(state.ty)) state.ty = 0;
   }
 
   function _viewportCenterSvg() {
@@ -4956,12 +5030,18 @@ const COUNTRY_ZOOM = (() => {
 
   function _clientToSvg(clientX, clientY) {
     if (!svgEl) return null;
-    const ctm = svgEl.getScreenCTM();
-    if (!ctm) return null;
-    const pt = svgEl.createSVGPoint();
-    pt.x = clientX; pt.y = clientY;
-    const p = pt.matrixTransform(ctm.inverse());
-    return { x: p.x, y: p.y };
+    try {
+      const ctm = svgEl.getScreenCTM();
+      if (!ctm) return null;
+      const inv = ctm.inverse();
+      if (!inv) return null;
+      const pt = svgEl.createSVGPoint();
+      pt.x = clientX; pt.y = clientY;
+      const p = pt.matrixTransform(inv);
+      return { x: p.x, y: p.y };
+    } catch (_) {
+      return null;
+    }
   }
 
   function zoomBy(factor, pivotX, pivotY) {
@@ -4995,29 +5075,36 @@ const COUNTRY_ZOOM = (() => {
      pan" flag to distinguish a sloppy click (mousedown -> tiny wiggle ->
      mouseup on a country) from an intentional pan that happens to end over
      a country. We only swallow the trailing `click` event when real panning
-     occurred. Only engaged at scale > 1x so a fresh, fully-zoomed-out map
-     behaves like a plain click map. */
+     occurred. */
   function _onMouseDown(e) {
     if (!svgEl || e.button !== 0) return;
-    if (state.scale <= MIN + 1e-4) return;
     drag = {
       startClientX: e.clientX,
       startClientY: e.clientY,
       startTx: state.tx,
       startTy: state.ty,
-      ctm: svgEl.getScreenCTM(),
+      startSvg: _clientToSvg(e.clientX, e.clientY),
       moved: false
     };
     svgEl.classList.add('panning');
   }
   function _onMouseMove(e) {
-    if (!drag || !drag.ctm) return;
+    if (!drag || !svgEl) return;
     const pxDx = e.clientX - drag.startClientX;
     const pxDy = e.clientY - drag.startClientY;
     if (!drag.moved && (Math.abs(pxDx) + Math.abs(pxDy)) > 3) drag.moved = true;
     if (drag.moved) e.preventDefault();
-    state.tx = drag.startTx + pxDx / drag.ctm.a;
-    state.ty = drag.startTy + pxDy / drag.ctm.d;
+    const cur = _clientToSvg(e.clientX, e.clientY);
+    if (cur && drag.startSvg) {
+      state.tx = drag.startTx + (cur.x - drag.startSvg.x);
+      state.ty = drag.startTy + (cur.y - drag.startSvg.y);
+    } else {
+      const ctm = svgEl.getScreenCTM();
+      if (!ctm || !Number.isFinite(ctm.a) || !Number.isFinite(ctm.d)) return;
+      if (Math.abs(ctm.a) < 1e-9 || Math.abs(ctm.d) < 1e-9) return;
+      state.tx = drag.startTx + pxDx / ctm.a;
+      state.ty = drag.startTy + pxDy / ctm.d;
+    }
     _clampPan();
     _apply();
   }
@@ -5064,6 +5151,26 @@ const COUNTRY_ZOOM = (() => {
   return { attach, zoomIn, zoomOut, reset };
 })();
 
+function _formatCountryLegendLow(metricKey) {
+  return metricKey === 'srb' ? ('$' + fmt(0)) : '0';
+}
+function _formatCountryLegendHigh(metricKey, maxV) {
+  if (metricKey === 'srb') return '$' + fmt(maxV);
+  return Math.round(maxV).toLocaleString();
+}
+function _setCountryLegend(metricKey, maxV) {
+  const lo = document.getElementById('countryLegendMin');
+  const hi = document.getElementById('countryLegendMax');
+  if (lo) lo.textContent = _formatCountryLegendLow(metricKey);
+  if (hi) hi.textContent = _formatCountryLegendHigh(metricKey, maxV);
+}
+function _resetCountryLegend() {
+  const lo = document.getElementById('countryLegendMin');
+  const hi = document.getElementById('countryLegendMax');
+  if (lo) lo.textContent = '0';
+  if (hi) hi.textContent = '\u2014';
+}
+
 function renderCountry() {
   const mapWrap = document.getElementById('countryMap');
   const svg     = mapWrap && mapWrap.querySelector('svg');
@@ -5092,6 +5199,7 @@ function renderCountry() {
 
   const source = filteredNoCountry && filteredNoCountry.length ? filteredNoCountry : filtered;
   if (!source || !source.length) {
+    _resetCountryLegend();
     _paintCountryEmpty(mapWrap, 'No rules to display.', 'Adjust filters to see the country distribution.');
     return;
   }
@@ -5127,6 +5235,7 @@ function renderCountry() {
     } else {
       msg = `Parser found <code>${detectedCol}</code> with ${countryVals.toLocaleString()} non-blank values but aggregation returned zero countries.`;
     }
+    _resetCountryLegend();
     _paintCountryEmpty(mapWrap, msg, 'Open the browser console (F12) for the full parse diagnostic line.');
     return;
   }
@@ -5170,6 +5279,7 @@ function renderCountry() {
   summary.textContent = '\u2014 ' + summaryBits.join(' \u00B7 ');
 
   if (!matched.length) {
+    _resetCountryLegend();
     _paintCountryEmpty(
       mapWrap,
       `None of the ${countries.length.toLocaleString()} country values in the data match a country on the map.`,
@@ -5192,6 +5302,7 @@ function renderCountry() {
      Minimum radius ensures small-but-present countries are still clickable. */
   const values = matched.map(getMetric);
   const maxV = Math.max(1, ...values);
+  _setCountryLegend(metricKey, maxV);
   const MIN_R = 2.6;
   const MAX_R = 14;
 
