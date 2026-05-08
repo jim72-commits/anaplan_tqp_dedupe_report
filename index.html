@@ -550,7 +550,7 @@
 
   /* ---- Detail drawer ---- */
   .drawer-wrap { flex-shrink: 0; overflow: hidden; border-top: 2px solid var(--accent); transition: height .25s ease; height: 0; display: flex; flex-direction: column; }
-  .drawer-wrap.open { height: 40vh; }
+  .drawer-wrap.open { height: 40vh; position: relative; z-index: 170; background: var(--surface); }
   /* Stack above .compare-bar (z-index:150) so the resize strip, title row, and
      close control stay clickable after the drawer height changes. */
   .drawer-wrap.open .drawer-resize,
@@ -627,7 +627,7 @@
   .drawer-resize:hover { background: var(--accent); }
 
   /* ---- Modal ---- */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 250; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
   .modal {
     background: var(--surface);
@@ -1336,6 +1336,34 @@
 
   /* Utility: tnum helper class */
   .tnum { font-variant-numeric: tabular-nums; }
+
+  /* ---- App version badge (v1.2) ---- */
+  .app-version {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--moody-blue);
+    border: 1px solid var(--moody-blue);
+    padding: 2px 6px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  /* ---- Remote sync modal (SharePoint / URLs) ---- */
+  .rs-form label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 10px 0 4px; }
+  .rs-form input[type="text"], .rs-form input[type="number"], .rs-form input[type="url"], .rs-form textarea {
+    width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; font-family: var(--mono);
+    box-sizing: border-box;
+  }
+  .rs-form textarea { min-height: 52px; resize: vertical; }
+  .rs-mode-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .rs-mode-row label { display: flex; align-items: center; gap: 6px; font-size: 12px; text-transform: none; font-weight: 600; color: var(--text); margin: 0; cursor: pointer; }
+  .rs-status { font-size: 11px; color: var(--text-muted); margin-top: 12px; padding: 8px 10px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius); white-space: pre-wrap; font-family: var(--mono); line-height: 1.4; }
+  .rs-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .rs-actions button { padding: 6px 12px; font-size: 11px; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border); background: var(--surface); }
+  .rs-actions button.primary { background: var(--text); color: #fff; border-color: var(--text); }
+  #remoteSyncOpenBtn { font-size: 11px; }
 </style>
 </head>
 <body>
@@ -1351,7 +1379,7 @@
        primitives in the masthead, KPIs, or anywhere else; brand presence is
        carried through colored bands (yellow header bar, blue active-tab
        underline, red compare-bar rule, KPI rails, severity dots). -->
-  <h1>Overlap Report &middot; SRB Assignment</h1>
+  <h1>Overlap Report &middot; SRB Assignment <span class="app-version" title="Release">v1.2</span></h1>
   <!-- Overlap Report source-file controls: dropzones, Analyze, progress/error,
        timestamp, New Files. This block is shown only on the Overlap Report
        tab; toggled by the tab switcher (see tab-bar click handler). -->
@@ -1367,6 +1395,7 @@
     <span id="importError" style="display:none;font-size:11px;color:var(--red);"></span>
     <span id="importTimestamp" class="import-ts" style="display:none;" title=""></span>
     <button class="import-new-btn" id="importNewBtn" style="display:none;">New Files</button>
+    <button type="button" class="import-new-btn" id="remoteSyncOpenBtn" title="Auto-refresh from SharePoint folder or direct CSV URLs (v1.2)">&#8635; Sync</button>
   </div>
   <div class="header-spacer"></div>
   <div class="stats" id="overlapStats" style="display:none;">
@@ -1690,6 +1719,61 @@
         <div class="shortcut-row"><span class="sk-label">Shortcuts</span><span class="sk-keys"><kbd>?</kbd></span></div>
         <div class="shortcut-row"><span class="sk-label">Print / PDF</span><span class="sk-keys"><kbd>Ctrl</kbd><kbd>P</kbd></span></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Remote sync (SharePoint / URLs) — v1.2 ========== -->
+<div class="modal-overlay" id="remoteSyncOverlay" role="dialog" aria-label="SharePoint sync settings">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-title">
+      <span>Auto-refresh sources</span>
+      <button type="button" class="close-btn" id="remoteSyncClose" aria-label="Close">&times;</button>
+    </div>
+    <div style="padding:16px 24px 24px; overflow-y:auto; max-height:75vh;">
+      <p style="font-size:12px;color:var(--text-muted);line-height:1.45;margin:0 0 12px;">
+        Poll a SharePoint folder via Microsoft Graph (sign in with your work account), or two HTTPS CSV URLs.
+        Browsers cannot read SharePoint folder pages directly — Graph sign-in is required unless IT exposes stable download URLs.
+      </p>
+      <div class="rs-mode-row">
+        <label><input type="radio" name="rsMode" id="rsModeGraph" value="graph" checked> Microsoft 365 / Graph</label>
+        <label><input type="radio" name="rsMode" id="rsModeUrl" value="url"> Direct CSV URLs</label>
+      </div>
+      <div id="rsGraphPanel" class="rs-form">
+        <label for="rsClientId">Azure AD Application (client) ID</label>
+        <input type="text" id="rsClientId" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        <label for="rsTenantId">Directory (tenant) ID</label>
+        <input type="text" id="rsTenantId" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+        <label for="rsLibrary">Document library name</label>
+        <input type="text" id="rsLibrary" placeholder="Territory Quota Management">
+        <label for="rsFolder">Folder path (inside that library)</label>
+        <textarea id="rsFolder" placeholder="Territory &amp; Quota Planning 2027/External Pages in TQP/1. Overlap Report"></textarea>
+        <label for="rsSrbName">SRB CSV file name (exact match)</label>
+        <input type="text" id="rsSrbName" placeholder="Your_SR_assignment_export.csv">
+        <label for="rsRulesName">Rules CSV file name (exact match)</label>
+        <input type="text" id="rsRulesName" placeholder="SYS09B_rules_summary.csv">
+      </div>
+      <div id="rsUrlPanel" class="rs-form" style="display:none;">
+        <label for="rsSrbUrl">SRB CSV URL (HTTPS)</label>
+        <input type="url" id="rsSrbUrl" placeholder="https://...">
+        <label for="rsRulesUrl">Rules CSV URL (HTTPS)</label>
+        <input type="url" id="rsRulesUrl" placeholder="https://...">
+        <label for="rsUrlBearer">Optional Authorization Bearer token (stored locally)</label>
+        <input type="text" id="rsUrlBearer" autocomplete="off" placeholder="Leave empty if URLs are anonymous or cookie-based">
+      </div>
+      <div class="rs-form">
+        <label for="rsPollMin">Poll interval (minutes)</label>
+        <input type="number" id="rsPollMin" min="2" max="1440" step="1" value="15">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;text-transform:none;font-weight:600;color:var(--text);">
+          <input type="checkbox" id="rsAutoEnabled"> Enable automatic refresh when file timestamps change
+        </label>
+      </div>
+      <div class="rs-actions">
+        <button type="button" class="primary" id="rsBtnSave">Save settings</button>
+        <button type="button" id="rsBtnSignIn">Sign in (Graph)</button>
+        <button type="button" id="rsBtnCheckNow">Check now</button>
+      </div>
+      <div class="rs-status" id="rsStatus" role="status">Not configured.</div>
     </div>
   </div>
 </div>
@@ -2058,23 +2142,26 @@ function parseRules(rows, header) {
   const cRule = col['Rule Code'];
   const cTerr = col['Territory Code'];
   if (cRule === undefined && cTerr === undefined) throw new Error('Missing "Rule Code" or "Territory Code" column in Rules file.');
-  const keyIdx = cRule !== undefined ? cRule : cTerr;
   const lookup = {}, byCode = {};
+  const pushUnique = (obj, key, attrs) => {
+    if (!key) return;
+    if (!obj[key]) obj[key] = [];
+    if (!obj[key].includes(attrs)) obj[key].push(attrs);
+  };
   for (const row of rows) {
-    let rawKey = (row[keyIdx]||'').trim();
-    if (!rawKey) continue;
+    const ruleKey = cRule !== undefined ? (row[cRule]||'').trim() : '';
+    let terrKey = cTerr !== undefined ? (row[cTerr]||'').trim() : '';
+    if (!terrKey && ruleKey.includes('|')) terrKey = ruleKey.split('|')[0].trim();
+    if (!ruleKey && !terrKey) continue;
     const attrs = {};
     for (const a of RULE_ATTRS) {
       if (col[a] !== undefined) attrs[a] = (row[col[a]]||'').trim();
     }
-    if (cRule !== undefined) {
-      if (!byCode[rawKey]) byCode[rawKey] = [];
-      byCode[rawKey].push(attrs);
+    if (ruleKey) {
+      pushUnique(byCode, ruleKey, attrs);
+      if (terrKey) pushUnique(byCode, `${terrKey}|${ruleKey}`, attrs);
     }
-    let tc = rawKey;
-    if (cRule !== undefined && tc.includes('|')) tc = tc.split('|')[0].trim();
-    if (!lookup[tc]) lookup[tc] = [];
-    lookup[tc].push(attrs);
+    pushUnique(lookup, terrKey || ruleKey, attrs);
   }
   RULES_BY_CODE = byCode;
   return lookup;
@@ -2113,6 +2200,20 @@ function acceptFile1(file) {
   importError.style.display = 'none';
   checkReady();
 }
+
+/* v1.2 remote sync (remote-sync.js): rules CSV is assigned via parsed array — `let file2Data`
+   is not visible across script tags, so we expose this setter on window. */
+window.setOverlapRulesFile = function(parsedRows, displayName) {
+  file2Data = parsedRows;
+  const dn = displayName || 'rules.csv';
+  file2Name = dn;
+  dz2.classList.add('loaded');
+  const t = document.getElementById('dz2Text');
+  if (t) t.textContent = dn.length > 20 ? dn.slice(0, 18) + '…' : dn;
+  dz2.title = dn;
+  importError.style.display = 'none';
+  checkReady();
+};
 
 dz1.addEventListener('click', () => fi1.click());
 dz1.addEventListener('dragover', e => { e.preventDefault(); dz1.classList.add('dragover'); });
@@ -2176,7 +2277,7 @@ function ovCacheClear() {
   }).catch(e => console.warn('Overlap cache clear failed:', e));
 }
 
-launchBtn.addEventListener('click', async () => {
+async function runOverlapAnalyze() {
   if (!file1Ref && !file1Data) return;
   importError.style.display = 'none';
   importProgress.style.display = 'inline';
@@ -2220,7 +2321,12 @@ launchBtn.addEventListener('click', async () => {
     setImportTimestamp(nowIso);
     launchApp(territories);
   } catch (e) { showError(e.message); launchBtn.disabled = false; }
-});
+}
+
+launchBtn.addEventListener('click', () => { runOverlapAnalyze(); });
+
+/* Exposed for v1.2 remote sync (SharePoint Graph / URL polling). */
+window.runOverlapAnalyze = runOverlapAnalyze;
 
 function setImportTimestamp(iso) {
   const el = document.getElementById('importTimestamp');
@@ -2574,6 +2680,7 @@ document.querySelectorAll('#rightTable th[data-rcol]').forEach(th => {
 document.getElementById('exportBtn').addEventListener('click', exportDetail);
 document.getElementById('exportAllBtn').addEventListener('click', exportAll);
 document.getElementById('importNewBtn').addEventListener('click', () => {
+  try { if (window.OverlapRemoteSync && typeof window.OverlapRemoteSync.stop === 'function') window.OverlapRemoteSync.stop(); } catch (_) {}
   showReportControls(false);
   closeDrawer();
   document.getElementById('overlapStats').style.display='none';
@@ -5846,5 +5953,6 @@ document.addEventListener('keydown', e => {
 })();
 
 </script>
+<script src="remote-sync.js" defer></script>
 </body>
 </html>
